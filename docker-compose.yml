@@ -14,7 +14,7 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-minio pandas requests}
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
   volumes:
     - ./airflow/dags:/opt/airflow/dags
@@ -43,11 +43,8 @@ services:
       retries: 5
       start_period: 5s
     restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: "512M"
+    networks:
+      - dwh_network
 
   redis:
     image: redis:7.2-bookworm
@@ -60,11 +57,8 @@ services:
       retries: 50
       start_period: 30s
     restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: "512M"
+    networks:
+      - dwh_network
 
   airflow-apiserver:
     <<: *airflow-common
@@ -82,11 +76,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: "1.5G"
+    networks:
+      - dwh_network
 
   airflow-scheduler:
     <<: *airflow-common
@@ -102,11 +93,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: "1.5G"
+    networks:
+      - dwh_network
 
   airflow-dag-processor:
     <<: *airflow-common
@@ -122,11 +110,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: "1G"
+    networks:
+      - dwh_network
 
   airflow-worker:
     <<: *airflow-common
@@ -149,11 +134,8 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: "1.5G"
+    networks:
+      - dwh_network
 
   airflow-triggerer:
     <<: *airflow-common
@@ -169,11 +151,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: "1G"
+    networks:
+      - dwh_network
 
   airflow-init:
     <<: *airflow-common
@@ -191,6 +170,13 @@ services:
           echo
           export AIRFLOW_UID=$$(id -u)
         fi
+
+        # Cài đặt các thư viện Python bổ sung với quyền của user airflow
+        echo
+        echo "Installing additional Python packages as airflow user..."
+        su - airflow -c "pip install minio pandas requests"
+        echo "Finished installing additional packages"
+
         one_meg=1048576
         mem_available=$$(($$(getconf _PHYS_PAGES) * $$(getconf PAGE_SIZE) / one_meg))
         cpus_available=$$(grep -cE 'cpu[0-9]+' /proc/stat)
@@ -264,6 +250,8 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
+    networks:
+      - dwh_network
 
   airflow-cli:
     <<: *airflow-common
@@ -278,6 +266,8 @@ services:
       - airflow
     depends_on:
       <<: *airflow-common-depends-on
+    networks:
+      - dwh_network
 
   flower:
     <<: *airflow-common
@@ -297,6 +287,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - dwh_network
 
   minio1:
     image: bitnami/minio:latest
@@ -318,7 +310,7 @@ services:
     command: server --address ":9000" --console-address ":9001" http://minio{1...4}/bitnami/minio/data
 
     networks:
-      - minio-cluster
+      - dwh_network
 
   minio2:
     image: bitnami/minio:latest
@@ -335,7 +327,7 @@ services:
     #   - minio2-data:/bitnami/minio/data
     command: server --address ":9000" http://minio{1...4}/bitnami/minio/data
     networks:
-      - minio-cluster
+      - dwh_network
 
   minio3:
     image: bitnami/minio:latest
@@ -352,7 +344,7 @@ services:
     #   - minio3-data:/bitnami/minio/data
     command: server --address ":9000" http://minio{1...4}/bitnami/minio/data
     networks:
-      - minio-cluster
+      - dwh_network
 
   minio4:
     image: bitnami/minio:latest
@@ -369,8 +361,22 @@ services:
     #   - minio4-data:/bitnami/minio/data
     command: server --address ":9000" http://minio{1...4}/bitnami/minio/data
     networks:
-      - minio-cluster
+      - dwh_network
 
+  db:
+    image: postgres:16
+    container_name: db
+    environment:
+      - POSTGRES_DB=final_project
+      - POSTGRES_USER=final_project
+      - POSTGRES_PASSWORD=final_project
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - dwh_network
+      
   data_source:
     build:
       context: ./data_source
@@ -380,14 +386,23 @@ services:
     - ./data_source:/app 
     ports:
       - "8000:8000"
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: "512M"
+    networks:
+      - dwh_network
+
+  duckdb:
+    build:
+      context: ./duck_db
+      dockerfile: Dockerfile
+    container_name: duckdb
+    volumes:
+    - ./duck_db:/app
+    # ports:
+    #   - "8090:8000"
+    networks:
+      - dwh_network
 
 networks:
-  minio-cluster:
+  dwh_network:
     driver: bridge
 
 
