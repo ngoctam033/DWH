@@ -1,0 +1,9 @@
+id,name,country,description,is_active,created_at,updated_at
+1,Apple,USA,Thương hiệu Apple đến từ USA,True,2023-03-13 07:21:53.996652,2025-08-08 07:21:53.996652
+2,Samsung,South Korea,Thương hiệu Samsung đến từ South Korea,True,2024-03-01 07:21:53.996652,2025-08-08 07:21:53.996652
+3,Dell,USA,Thương hiệu Dell đến từ USA,True,2025-02-08 07:21:53.996652,2025-08-08 07:21:53.996652
+4,HP,USA,Thương hiệu HP đến từ USA,True,2022-11-25 07:21:53.996652,2025-08-08 07:21:53.996652
+5,Sony,Japan,Thương hiệu Sony đến từ Japan,True,2025-02-27 07:21:53.996652,2025-08-08 07:21:53.996652
+6,Xiaomi,China,Thương hiệu Xiaomi đến từ China,True,2024-01-10 07:21:53.996652,2025-08-08 07:21:53.996652
+7,Asus,Taiwan,Thương hiệu Asus đến từ Taiwan,True,2023-11-15 07:21:53.996652,2025-08-08 07:21:53.996652
+8,Lenovo,China,Thương hiệu Lenovo đến từ China,True,2023-01-20 07:21:53.996652,2025-08-08 07:21:53.996652
