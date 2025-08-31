@@ -255,11 +255,11 @@ def generate_customers(num_customers=100, created_at=None, order_channel=None):
                 }
             }
             
-        elif order_channel_lower == "facebook":
-            # Cấu trúc JSON kiểu Facebook
+        elif order_channel_lower == "tiki":
+            # Cấu trúc JSON kiểu Tiki
             return {
                 "status": "success",
-                "timestamp": datetime.now().timestamp(),  # Facebook thường dùng Unix timestamp
+                "timestamp": datetime.now().timestamp(),
                 "data": {
                     "users": {
                         "data": customers_basic,

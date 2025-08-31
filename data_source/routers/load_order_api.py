@@ -8,7 +8,6 @@ from services.gen_order import create_multiple_orders
 from sqlalchemy import text
 import random
 from decimal import Decimal
-
 router = APIRouter()
 
 @router.get("/extract-order")
@@ -167,10 +166,10 @@ def extract_order(
                     "id": sample_id,  # Sử dụng ID thực từ database
                     "order_date": "25/13/2025",  # Ngày không hợp lệ
                     "total_price": "free",
-                    "status": {"main": "complicated", "sub": "structure"}
                 }
                 orders.append(weird_record)
-            
+            # In ra kích thước của orders
+            print(f"Kích thước của orders: {len(orders)}")
             # Thay đổi cấu trúc JSON tùy thuộc vào order_channel để mô phỏng các nguồn dữ liệu khác nhau
             if order_channel.lower() == "shopee":
                 # Cấu trúc JSON kiểu Shopee
@@ -213,23 +212,31 @@ def extract_order(
                     },
                     "created_count": created_count
                 })
-            else:
-                # Cấu trúc cho các kênh không xác định - vẫn trả về dữ liệu nhưng cấu trúc khác
+            elif order_channel.lower() == "tiki":
+                # Cấu trúc JSON kiểu Tiki
                 return JSONResponse({
-                    "api_version": "v1.0",
-                    "channel": order_channel,
-                    "status": {
-                        "code": 200,
-                        "message": "OK"
-                    },
-                    "result": {
-                        "order_data": orders,
-                        "metadata": {
-                            "count": len(orders),
-                            "created": created_count,
-                            "date": created_at,
-                            "generated_at": datetime.now().isoformat()
+                    "status": 200,
+                    "data": {
+                        "orders": orders,
+                        "summary": {
+                            "total_orders": len(orders),
+                            "created_at": datetime.now().isoformat(),
+                            "source": "tiki-api",
+                            "version": "1.0.0"
                         }
+                    },
+                    "message": f"Đã tạo {created_count} đơn hàng mới và tổng cộng {len(orders)} đơn hàng cho ngày {created_at}"
+                })
+            elif order_channel.lower() == "website":
+                # Cấu trúc JSON kiểu Website
+                return JSONResponse({
+                    "result": "success",
+                    "orders": orders,
+                    "meta": {
+                        "count": len(orders),
+                        "created_count": created_count,
+                        "channel": "website",
+                        "generated_at": datetime.now().isoformat()
                     }
                 })
             

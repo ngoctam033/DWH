@@ -1,0 +1,9 @@
+id,name,description,category_id,created_at,updated_at,is_active
+1,Gaming,Danh mục con Gaming thuộc Laptop,1,2025-08-17 13:20:12,2025-08-17 13:20:12,TRUE
+2,Cao cấp,Danh mục con Cao cấp thuộc Laptop,1,2025-08-17 13:20:18,2025-08-17 13:20:18,TRUE
+3,Standard Laptop,Danh mục con Standard Laptop thuộc Laptop,1,2025-08-17 13:37:09,2025-08-17 13:37:09,TRUE
+4,Văn phòng,Danh mục con Văn phòng thuộc Laptop,1,2025-08-17 13:53:57,2025-08-17 13:53:57,TRUE
+5,General,Danh mục con General thuộc Laptop,1,2025-08-17 15:45:03,2025-08-17 15:45:03,TRUE
+6,Điện thoại phổ thông,Danh mục con Điện thoại phổ thông thuộc Laptop,1,2025-08-17 16:36:15,2025-08-17 16:36:15,TRUE
+7,Phổ thông,Điện thoại phổ thông,1,2025-08-17 16:43:09,2025-08-17 16:43:09,TRUE
+8,Smartphone,Điện thoại thông minh,1,2025-08-17 17:06:39,2025-08-17 17:06:39,TRUE

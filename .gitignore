@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Airflow
+logs/
+airflow.db
+airflow.cfg
+webserver_config.py
+unittests.cfg
+.coverage
+.pytest_cache/
+
+# Data files
+*.parquet
+*.xlsx
+*.xls
+*.json
+*.html
+*.txt
+output_dt.csv
+output_laptop.csv
+crawl.ipynb
+parse.py
+/data/
+/raw/
+/bronze/
+/silver/
+/gold/
+minio-data
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.env
+.env.*
+
+# MinIO local data
+.minio.sys/
+
+# DuckDB
+*.duckdb
+*.duckdb.wal
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.out
+
+# Secrets
+credentials.py
+*_config.py
+!minio_config.py
+!db_config.py
+
+# Virtual environment
+.venv
