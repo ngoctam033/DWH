@@ -32,6 +32,7 @@ x-airflow-common:
 services:
 
   postgres:
+    profiles: [manual]
     image: postgres:13
     environment:
       POSTGRES_USER: airflow
@@ -47,6 +48,7 @@ services:
       - dwh_network
 
   redis:
+    profiles: [manual]
     image: redis:7.2-bookworm
     expose:
       - 6379
@@ -61,6 +63,7 @@ services:
       - dwh_network
 
   airflow-apiserver:
+    profiles: [manual]
     <<: *airflow-common
     command: api-server
     ports:
@@ -80,6 +83,7 @@ services:
       - dwh_network
 
   airflow-scheduler:
+    profiles: [manual]
     <<: *airflow-common
     command: scheduler
     healthcheck:
@@ -97,6 +101,7 @@ services:
       - dwh_network
 
   airflow-dag-processor:
+    profiles: [manual]
     <<: *airflow-common
     command: dag-processor
     healthcheck:
@@ -114,6 +119,7 @@ services:
       - dwh_network
 
   airflow-worker:
+    profiles: [manual]
     <<: *airflow-common
     command: celery worker
     healthcheck:
@@ -138,6 +144,7 @@ services:
       - dwh_network
 
   airflow-triggerer:
+    profiles: [manual]
     <<: *airflow-common
     command: triggerer
     healthcheck:
@@ -155,6 +162,7 @@ services:
       - dwh_network
 
   airflow-init:
+    profiles: [manual]
     <<: *airflow-common
     entrypoint: /bin/bash
     command:
@@ -254,6 +262,7 @@ services:
       - dwh_network
 
   airflow-cli:
+    profiles: [manual]
     <<: *airflow-common
     profiles:
       - debug
@@ -270,6 +279,7 @@ services:
       - dwh_network
 
   flower:
+    profiles: [manual]
     <<: *airflow-common
     command: celery flower
     profiles:
@@ -291,6 +301,7 @@ services:
       - dwh_network
 
   minio1:
+    profiles: [manual]
     image: bitnami/minio:latest
     # container_name: minio1
     environment:
@@ -364,6 +375,7 @@ services:
   #     - dwh_network
 
   db:
+    profiles: [manual]
     image: postgres:16
     container_name: db
     environment:
@@ -378,6 +390,7 @@ services:
       - dwh_network
       
   data_source:
+    profiles: [manual]
     build:
       context: ./data_source
       dockerfile: Dockerfile
@@ -390,6 +403,7 @@ services:
       - dwh_network
 
   duckdb:
+    profiles: [manual]
     build:
       context: ./duck_db
       dockerfile: Dockerfile
