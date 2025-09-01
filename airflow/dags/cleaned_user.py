@@ -136,7 +136,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_user_data',
         python_callable=clean_user_data,
-        inlets = [SHOPEE_USER_PARQUET]
+        #inlets = [SHOPEE_USER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -167,7 +167,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_user_data',
         python_callable=clean_user_data,
-        inlets = [LAZADA_USER_PARQUET]
+        #inlets = [LAZADA_USER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -198,7 +198,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_user_data',
         python_callable=clean_user_data,
-        inlets = [TIKI_USER_PARQUET]
+        #inlets = [TIKI_USER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -229,7 +229,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_user_data',
         python_callable=clean_user_data,
-        inlets = [TIKTOK_USER_PARQUET]
+        #inlets = [TIKTOK_USER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -260,7 +260,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_user_data',
         python_callable=clean_user_data,
-        inlets = [WEBSITE_USER_PARQUET]
+        #inlets = [WEBSITE_USER_PARQUET]
     )
 
     save_data = PythonOperator(
