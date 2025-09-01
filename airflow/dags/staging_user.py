@@ -9,6 +9,7 @@ import pyarrow.parquet as pq
 from datetime import datetime, timedelta
 # Sử dụng BytesIO thay vì file tạm thời
 from io import BytesIO
+import os
 
 # Import datasets từ DAG extract_user
 from extract_user import (
@@ -19,7 +20,7 @@ from extract_user import (
 
 # Import thư viện kết nối MinIO
 from config.minio_config import (
-    get_object_name, download_json_from_minio
+    get_object_name, download_json_from_minio, list_files_in_minio_dir
 )
 
 # Định nghĩa asset đầu ra - với cấu trúc partition theo year/month/day
@@ -57,7 +58,8 @@ def get_yesterday_file_paths(**context):
     """
     logging.info(f"Context của DAG run này: {context}")
     # logical date lấy trong context, nếu không có thì lấy ngày hôm qua
-    logical_date = context.get('logical_date', datetime.now() - timedelta(days=1))
+    logical_date = context.get('logical_date', datetime.now())
+    logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
     if not logical_date:
         raise ValueError("logical_date không tồn tại trong context.")
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
@@ -73,15 +75,17 @@ def get_yesterday_file_paths(**context):
         raise ValueError("Tham số 'channel' phải được cung cấp trong params của DAG")
     
     # Kết quả chứa đường dẫn file
-    result = {}
+    result = []
     
     # Nếu có data_model cụ thể
     if data_model:
         object_name = get_object_name(layer, channel, data_model, logical_date, file_type=file_type)
-        result[f"{channel}_{data_model}"] = object_name
-        logging.info(f"Đã tạo đường dẫn cho data_model '{data_model}': {object_name}")
+        object_dir = os.path.dirname(object_name)
+        logging.info(f"Thư mục chứa file: {object_dir}")
+        # Lấy danh sách file thực tế trong thư mục object_dir
+        result = list_files_in_minio_dir(object_dir)
+        logging.info(f"Danh sách file trong thư mục: {result}")
     else:
-        # Không cho phép chạy nếu không có data_model
         error_msg = "Tham số 'data_model' không được cung cấp trong params của DAG"
         logging.error(error_msg)
         raise ValueError(error_msg)
@@ -123,30 +127,30 @@ def download_all_json_files(**context):
     logging.info(f"Bắt đầu download {len(file_paths)} file JSON từ MinIO")
     
     # Duyệt qua từng đường dẫn và download file
-    for file_key, object_name in file_paths.items():
+    for object_name in file_paths:
         try:
-            logging.info(f"Đang download file: {object_name} (key: {file_key})")
-            
+            logging.info(f"Đang download file: {object_name}")
+
             # Download file từ MinIO
             file_content = download_json_from_minio(object_name, bucket_name) if bucket_name else download_json_from_minio(object_name)
             
             # Lưu nội dung vào dictionary
-            downloaded_files[file_key] = {
+            downloaded_files[object_name] = {
                 'content': file_content,
                 'path': object_name
             }
             
             # Log thông tin file đã download
-            logging.info(f"Đã download thành công file '{file_key}' từ: s3://{bucket_name or 'DEFAULT_BUCKET'}/{object_name}")
+            logging.info(f"Đã download thành công file '{object_name}' từ: s3://{bucket_name or 'DEFAULT_BUCKET'}/{object_name}")
             if isinstance(file_content, dict):
-                logging.info(f"  - File '{file_key}' có {len(file_content)} keys chính")
+                logging.info(f"  - File '{object_name}' có {len(file_content)} keys chính")
             elif isinstance(file_content, list):
-                logging.info(f"  - File '{file_key}' có {len(file_content)} items")
+                logging.info(f"  - File '{object_name}' có {len(file_content)} items")
             else:
-                logging.info(f"  - File '{file_key}' có kiểu dữ liệu: {type(file_content)}")
-            
+                logging.info(f"  - File '{object_name}' có kiểu dữ liệu: {type(file_content)}")
+
         except Exception as e:
-            logging.error(f"Lỗi khi download file '{file_key}' ({object_name}): {e}")
+            logging.error(f"Lỗi khi download file '{object_name}': {e}")
     
     # Lưu kết quả vào XCom để các task sau có thể sử dụng
     context['ti'].xcom_push(key='downloaded_files', value=downloaded_files)
@@ -376,12 +380,13 @@ def convert_to_parquet_and_save(**context):
     
     if not user_list:
         error_msg = "Không tìm thấy user_list từ task trước"
-        logging.error(error_msg)
-        raise ValueError(error_msg)
+        logging.warning(error_msg)  # Đổi từ logging.error sang logging.warning
+        # Không raise lỗi nữa, chỉ log và cho qua
+        # raise ValueError(error_msg)
     
     # Lấy logical_date từ context
-    logical_date = context.get('logical_date')
-    
+    logical_date = context.get('logical_date', datetime.now())
+    logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
     # Lấy tham số từ context
     params = context.get('params', {})
     layer = params.get('layer_outlet')
@@ -393,6 +398,10 @@ def convert_to_parquet_and_save(**context):
         # Chuyển user_list thành DataFrame
         df = pd.DataFrame(user_list)
         
+        # Thêm cột order_channel từ params
+        order_channel = params.get('channel')
+        df['order_channel'] = order_channel
+
         # Log thông tin DataFrame
         logging.info(f"Đã chuyển đổi user_list thành DataFrame:")
         logging.info(f"  - Số dòng: {len(df)}")
