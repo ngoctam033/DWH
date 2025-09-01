@@ -37,16 +37,16 @@ def extract_order(
             query = """
             SELECT 
                 id, order_code, created_at, order_date, status, total_price, 
-                shipping_cost, profit, payment_id, shipping_id,
+                shipping_cost, payment_id, shipping_id,
                 customer_id, logistics_partner_id
             FROM orders
-            WHERE DATE(order_date) = DATE(:created_at)
+            --WHERE DATE(order_date) = DATE(:created_at)
             """
             
             # Thêm điều kiện lọc theo kênh bán hàng nếu có
             params = {"created_at": created_at_dt}
             if order_channel and order_channel.lower() != "all":
-                query += " AND order_channel_id = (SELECT id FROM order_channel WHERE LOWER(name) = LOWER(:order_channel))"
+                query += " WHERE order_channel_id = (SELECT id FROM order_channel WHERE LOWER(name) = LOWER(:order_channel))"
                 params["order_channel"] = order_channel
             
             # In log câu lệnh SQL cuối cùng được sử dụng
@@ -109,15 +109,6 @@ def extract_order(
                             order_dict[key] = value
                     
                     # 5. Các giá trị outlier và không hợp lệ
-                    elif key == 'profit' and isinstance(value, Decimal):
-                        if i % 15 == 0:  # ~7% dữ liệu
-                            # Tạo giá trị outlier cực lớn
-                            order_dict[key] = float(value) * 1000
-                        elif i % 20 == 0:
-                            # Giá trị âm bất thường
-                            order_dict[key] = float(value) * -10
-                        else:
-                            order_dict[key] = float(value)
                     
                     # 6. Vấn đề về kiểu dữ liệu không nhất quán
                     elif key == 'order_code':

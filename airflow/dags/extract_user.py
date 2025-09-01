@@ -37,7 +37,7 @@ def fetch_json_from_api(**context):
     base_url = dag_params.get('api_url')
     
     # Tham số API có thể tùy chỉnh từ config hoặc params của DAG
-    order_channel = dag_params.get('order_channel', "shopee")
+    order_channel = dag_params.get('order_channel')
      
     params = {
         "created_at": date_str,
@@ -171,7 +171,7 @@ default_args = {
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 0,
     'retry_delay': timedelta(minutes=5),
     'execution_timeout': timedelta(minutes=1)  # Timeout mặc định là 1 phút
 }

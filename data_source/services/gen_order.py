@@ -149,8 +149,6 @@ def create_one_order(order_date = None):
                 shipping_cost = base_shipping
             
             # 12. Tính lợi nhuận (20-30% giá trị đơn hàng)
-            profit_margin = random.uniform(0.2, 0.3)
-            profit = round(total_amount * profit_margin, 2)
             
             # 13. Tạo bản ghi shipment
             tracking_number = f"TRK{uuid.uuid4().hex[:12].upper()}"
@@ -158,7 +156,7 @@ def create_one_order(order_date = None):
             
             # Tạo ngày tạo và cập nhật ngẫu nhiên trong quá khứ
             # Ngày tạo: trong khoảng từ 60 đến 30 ngày trước order_date
-            created_date = order_date - timedelta(days=random.randint(30, 60))
+            created_date = order_date - timedelta(days=random.randint(1, 5))
             # Ngày cập nhật: trong khoảng từ ngày tạo đến order_date
             days_diff = (order_date - created_date).days
             updated_date = created_date + timedelta(days=random.randint(0, max(1, days_diff)))
@@ -238,7 +236,6 @@ def create_one_order(order_date = None):
                 'shipping_cost': shipping_cost,
                 'total_price': total_amount,
                 'total_shipping_cost': shipping_cost,
-                'profit': profit,
                 'created_at': now,
                 'updated_at': now,
                 'is_active': True
@@ -250,11 +247,11 @@ def create_one_order(order_date = None):
                     INSERT INTO orders (customer_id, payment_id, shipping_id, discount_id, location_id, 
                                        logistics_partner_id, order_channel_id, order_code, order_date, 
                                        status, shipping_cost, is_active, created_at, updated_at,
-                                       total_price, total_shipping_cost, profit)
+                                       total_price, total_shipping_cost)
                     VALUES (:customer_id, :payment_id, :shipping_id, :discount_id, :location_id,
                             :logistics_partner_id, :order_channel_id, :order_code, :order_date, 
                             :status, :shipping_cost, :is_active, :created_at, :updated_at,
-                            :total_price, :total_shipping_cost, :profit)
+                            :total_price, :total_shipping_cost)
                     RETURNING id
                     """),
                     order_data
@@ -443,7 +440,6 @@ def create_one_order(order_date = None):
                 'final_status': final_status,
                 'total_amount': total_amount,
                 'shipping_cost': shipping_cost,
-                'profit': profit,
                 'items': [
                     {
                         'id': item_id,
@@ -469,30 +465,6 @@ def create_one_order(order_date = None):
             # Commit transaction
             conn.execute(text("COMMIT"))
             print("Transaction committed successfully.")
-            
-            # In thông tin chi tiết
-            print("\n========== TẠO ĐƠN HÀNG THÀNH CÔNG ==========")
-            print(f"Order ID: {result['order_id']}")
-            print(f"Mã đơn hàng: {result['order_code']}")
-            print(f"Khách hàng: {result['customer_id']}")
-            print(f"Ngày đặt: {result['order_date']}")
-            print(f"Trạng thái cuối: {result['final_status']}")
-            print(f"Tổng tiền: {result['total_amount']:,} VND")
-            print(f"Phí vận chuyển: {result['shipping_cost']:,} VND")
-            print(f"Lợi nhuận: {result['profit']:,} VND")
-            
-            print("\nChi tiết đơn hàng:")
-            for idx, item in enumerate(result['items'], 1):
-                print(f"  {idx}. Sản phẩm ID {item['product_id']}: {item['quantity']} x {item['unit_price']:,} VND")
-                if item['discount'] > 0:
-                    print(f"     → Giảm giá: {item['discount']:,} VND")
-                print(f"     → Thành tiền: {item['amount']:,} VND")
-            
-            print("\nLịch sử trạng thái:")
-            for idx, status in enumerate(result['status_history'], 1):
-                print(f"  {idx}. {status['status']} ({status['changed_at']}) - bởi {status['changed_by']}")
-            
-            print("=============================================")
             
         except Exception as e:
             # Rollback trong trường hợp có lỗi

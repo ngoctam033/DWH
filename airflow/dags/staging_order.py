@@ -26,11 +26,11 @@ from config.minio_config import (
 )
 
 # Định nghĩa asset đầu ra - với cấu trúc partition theo year/month/day
-SHOPEE_ORDER_PARQUET = Dataset("s3://minio/staging/shopee/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-TIKTOK_ORDER_PARQUET = Dataset("s3://minio/staging/tiktok/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-TIKI_ORDER_PARQUET = Dataset("s3://minio/staging/tiki/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-LAZADA_ORDER_PARQUET = Dataset("s3://minio/staging/lazada/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-WEBSITE_ORDER_PARQUET = Dataset("s3://minio/staging/website/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
+SHOPEE_ORDER_PARQUET = Dataset("s3://minio/staging/shopee/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+TIKTOK_ORDER_PARQUET = Dataset("s3://minio/staging/tiktok/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+TIKI_ORDER_PARQUET = Dataset("s3://minio/staging/tiki/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+LAZADA_ORDER_PARQUET = Dataset("s3://minio/staging/lazada/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+WEBSITE_ORDER_PARQUET = Dataset("s3://minio/staging/website/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
 
 # Tham số chung cho DAG
 default_args = {
@@ -261,7 +261,7 @@ with DAG(
     dag_id='transform_lazada_order_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Lazada',
-    schedule=[LAZADA_ORDER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'lazada'],
@@ -304,7 +304,7 @@ with DAG(
     dag_id='transform_shopee_order_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Shopee',
-    schedule=[SHOPEE_ORDER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'shopee'],
@@ -347,7 +347,7 @@ with DAG(
     dag_id='transform_tiki_order_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiki',
-    schedule=[TIKI_ORDER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'tiki'],
@@ -391,7 +391,7 @@ with DAG(
     dag_id='transform_website_order_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Website',
-    schedule=[WEBSITE_ORDER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'website'],
@@ -435,7 +435,7 @@ with DAG(
     dag_id='transform_tiktok_order_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiktok',
-    schedule=[TIKTOK_ORDER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'tiktok'],

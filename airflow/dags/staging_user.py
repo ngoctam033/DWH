@@ -1,4 +1,3 @@
-from multiprocessing import context
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.datasets import Dataset
@@ -8,7 +7,6 @@ import logging
 import pyarrow as pa
 import pyarrow.parquet as pq
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
 # Sử dụng BytesIO thay vì file tạm thời
 from io import BytesIO
 
@@ -37,7 +35,7 @@ default_args = {
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 0,  # <-- Không retry
     'retry_delay': timedelta(minutes=5)
 }
 
@@ -57,15 +55,16 @@ def get_yesterday_file_paths(**context):
     None
         Kết quả được lưu vào XCom thay vì return trực tiếp
     """
-    
-    # Lấy logical_date từ context
-    logical_date = context.get('logical_date')
-
+    logging.info(f"Context của DAG run này: {context}")
+    # logical date lấy trong context, nếu không có thì lấy ngày hôm qua
+    logical_date = context.get('logical_date', datetime.now() - timedelta(days=1))
+    if not logical_date:
+        raise ValueError("logical_date không tồn tại trong context.")
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
     
     # Lấy tham số từ context
     params = context.get('params', {})
-    layer = params.get('layer')  # Mặc định là 'raw'
+    layer = params.get('layer_inlets')  # Mặc định là 'raw'
     channel = params.get('channel')
     data_model = params.get('data_model')
     file_type = params.get('file_type')
@@ -385,7 +384,7 @@ def convert_to_parquet_and_save(**context):
     
     # Lấy tham số từ context
     params = context.get('params', {})
-    layer = params.get('layer_outlet', 'staging')
+    layer = params.get('layer_outlet')
     channel = params.get('channel')
     data_model = params.get('data_model')
     bucket_name = params.get('bucket_name')
@@ -455,7 +454,7 @@ with DAG(
     dag_id='transform_shopee_user_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Shopee',
-    schedule=[SHOPEE_USER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'shopee'],
@@ -473,7 +472,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[SHOPEE_USER_DATASET]
+        #inlets=[SHOPEE_USER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -499,7 +498,7 @@ with DAG(
     dag_id='transform_tiktok_user_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiktok',
-    schedule=[TIKTOK_USER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'tiktok'],
@@ -517,7 +516,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[TIKTOK_USER_DATASET]
+        # #inlets=[TIKTOK_USER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -543,7 +542,7 @@ with DAG(
     dag_id='transform_lazada_user_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Lazada',
-    schedule=[LAZADA_USER_DATASET],
+    schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'lazada'],
@@ -561,7 +560,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[LAZADA_USER_DATASET]
+        #inlets=[LAZADA_USER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -587,7 +586,7 @@ with DAG(
     dag_id='transform_tiki_user_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiki',
-    schedule=[TIKI_USER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'tiki'],
@@ -605,7 +604,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[TIKI_USER_DATASET]
+        #inlets=[TIKI_USER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -631,7 +630,7 @@ with DAG(
     dag_id='transform_website_user_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Website',
-    schedule=[WEBSITE_USER_DATASET],
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'website'],
@@ -649,7 +648,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[WEBSITE_USER_DATASET]
+        #inlets=[WEBSITE_USER_DATASET]
     )
 
     download_file = PythonOperator(
