@@ -78,7 +78,7 @@ def clean_order_data(**context):
     logging.info(f"Số dòng sau khi lọc trùng: {len(df_clean)}")
 
     # Đẩy DataFrame đã lọc trùng lên XCom (dùng to_dict để serialize)
-    context['ti'].xcom_push(key='cleaned_ORDER_data', value=df_clean.to_dict(orient='records'))
+    context['ti'].xcom_push(key='cleaned_order_data', value=df_clean.to_dict(orient='records'))
     logging.info(f"Đã đẩy {len(df_clean)} bản ghi đã làm sạch lên XCom.")
 
 def save_cleaned_order_data(**context):
@@ -136,7 +136,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_order_data',
         python_callable=clean_order_data,
-        inlets = [SHOPEE_ORDER_PARQUET]
+        #inlets = [SHOPEE_ORDER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -167,7 +167,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_order_data',
         python_callable=clean_order_data,
-        inlets = [LAZADA_ORDER_PARQUET]
+        #inlets = [LAZADA_ORDER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -198,7 +198,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_order_data',
         python_callable=clean_order_data,
-        inlets = [TIKI_ORDER_PARQUET]
+        #inlets = [TIKI_ORDER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -229,7 +229,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_order_data',
         python_callable=clean_order_data,
-        inlets = [TIKTOK_ORDER_PARQUET]
+        #inlets = [TIKTOK_ORDER_PARQUET]
     )
 
     save_data = PythonOperator(
@@ -260,7 +260,7 @@ with DAG(
     clean_data = PythonOperator(
         task_id='clean_order_data',
         python_callable=clean_order_data,
-        inlets = [WEBSITE_ORDER_PARQUET]
+        #inlets = [WEBSITE_ORDER_PARQUET]
     )
 
     save_data = PythonOperator(
