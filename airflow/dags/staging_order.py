@@ -1,6 +1,7 @@
 from multiprocessing import context
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.datasets import Dataset
 import pandas as pd
 import json
@@ -279,7 +280,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[LAZADA_ORDER_DATASET]
+        # inlets=[LAZADA_ORDER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -297,8 +298,19 @@ with DAG(
         python_callable=convert_to_parquet_and_save,
         outlets=[LAZADA_ORDER_PARQUET],
     )
+    # Task cuối cùng: Trigger DAG clean_order_data_lazada_with_duckdb
+    trigger_clean_dag = TriggerDagRunOperator(
+        task_id='trigger_clean_order_data_lazada',
+        trigger_dag_id='clean_order_data_lazada_with_duckdb',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+            'channel': 'lazada',        # Truyền thêm thông tin kênh
+        },
+        wait_for_completion=True,  # Không chờ DAG được trigger hoàn thành
+    )
 
-    get_file_path >> download_file >> parse_json >> convert_to_parquet
+    # Định nghĩa luồng thực thi
+    get_file_path >> download_file >> parse_json >> convert_to_parquet >> trigger_clean_dag
 
 with DAG(
     dag_id='transform_shopee_order_to_parquet',
