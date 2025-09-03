@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.datasets import Dataset
 import requests
 import logging
@@ -207,10 +208,19 @@ with DAG(
         python_callable=save_raw_json_to_minio,
         outlets=[SHOPEE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
     )
+    
+    # Task 3: Trigger DAG transform_shopee_user_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_shopee_user_to_parquet',
+        trigger_dag_id='transform_shopee_user_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'
+        },
+        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+    )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 with DAG(
     dag_id='daily_extract_tiktok_user',  # Định danh duy nhất cho DAG
@@ -243,10 +253,19 @@ with DAG(
         python_callable=save_raw_json_to_minio,
         outlets=[TIKTOK_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset TikTok
     )
+    
+    # Task 3: Trigger DAG transform_tiktok_user_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_tiktok_user_to_parquet',
+        trigger_dag_id='transform_tiktok_user_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'
+        },
+        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+    )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 with DAG(
     dag_id='daily_extract_tiki_user',  # Định danh duy nhất cho DAG
@@ -280,9 +299,18 @@ with DAG(
         outlets=[TIKI_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
     )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Task 3: Trigger DAG transform_tiki_user_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_tiki_user_to_parquet',
+        trigger_dag_id='transform_tiki_user_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'
+        },
+        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 with DAG(
     dag_id='daily_extract_website_user',  # Định danh duy nhất cho DAG
@@ -315,10 +343,19 @@ with DAG(
         python_callable=save_raw_json_to_minio,
         outlets=[WEBSITE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
     )
+    
+    # Task 3: Trigger DAG transform_website_user_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_website_user_to_parquet',
+        trigger_dag_id='transform_website_user_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'
+        },
+        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+    )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 with DAG(
     dag_id='daily_extract_lazada_user',  # Định danh duy nhất cho DAG
@@ -352,6 +389,15 @@ with DAG(
         outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
     )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Task 3: Trigger DAG transform_lazada_user_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_lazada_user_to_parquet',
+        trigger_dag_id='transform_lazada_user_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'
+        },
+        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag

@@ -1,6 +1,8 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.datasets import Dataset
+from airflow.exceptions import AirflowFailException
 import pandas as pd
 import json
 import logging
@@ -56,13 +58,12 @@ def get_yesterday_file_paths(**context):
     None
         Kết quả được lưu vào XCom thay vì return trực tiếp
     """
-    logging.info(f"Context của DAG run này: {context}")
+    conf = context['dag_run'].conf
     # logical date lấy trong context, nếu không có thì lấy ngày hôm qua
-    logical_date = context.get('logical_date', datetime.now())
+    logical_date = conf.get('logical_date')
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
     if not logical_date:
-        raise ValueError("logical_date không tồn tại trong context.")
-    logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
+        raise ValueError("logical_date không tồn tại trong context 1.")
     
     # Lấy tham số từ context
     params = context.get('params', {})
@@ -89,7 +90,16 @@ def get_yesterday_file_paths(**context):
         error_msg = "Tham số 'data_model' không được cung cấp trong params của DAG"
         logging.error(error_msg)
         raise ValueError(error_msg)
-
+    # Kiểm tra nếu kết quả trống
+    if not result:
+        error_msg = f"Không tìm thấy file nào cho {channel}/{data_model} ngày {logical_date.strftime('%Y-%m-%d')} trong thư mục {object_dir}"
+        logging.error(error_msg)
+        # Đánh dấu task là failed
+        raise AirflowFailException(error_msg)
+    
+    # Kiểm tra và chuyển đổi logical_date nếu cần
+    if isinstance(logical_date, str):
+        logical_date = datetime.strptime(logical_date, '%Y-%m-%d')  # Chuyển từ chuỗi sang datetime
     logging.info(f"Danh sách file ngày hôm qua ({logical_date.strftime('%Y-%m-%d')}): {result}")
 
     # Lưu kết quả vào XCom để các task sau có thể sử dụng
@@ -499,8 +509,19 @@ with DAG(
         python_callable=convert_to_parquet_and_save,
         outlets=[SHOPEE_USER_PARQUET],
     )
+    # Task cuối cùng: Trigger DAG clean_user_data_shopee_with_duckdb
+    trigger_clean_dag = TriggerDagRunOperator(
+        task_id='trigger_clean_user_data_shopee',
+        trigger_dag_id='clean_user_data_shopee_with_duckdb',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
+            'channel': 'shopee',        # Truyền thêm thông tin kênh
+        },
+        wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+    )
 
-    get_file_path >> download_file >> parse_json >> convert_to_parquet
+    # Định nghĩa luồng thực thi
+    get_file_path >> download_file >> parse_json >> convert_to_parquet >> trigger_clean_dag
 
 # DAG cho Tiktok
 with DAG(
@@ -606,7 +627,7 @@ with DAG(
         'file_type': 'json',
         'data_model': 'users'
     }
-) as lazada_dag:
+) as tiki_dag:
 
     #  gọi hàm get_yesterday_file_paths để lấy đường dẫn file
 
