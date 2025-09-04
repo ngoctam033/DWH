@@ -1,19 +1,16 @@
-import duckdb
-import os
-from config import DUCKDB_FILE, BASE_DIR
+from config import MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_SECURE, DEFAULT_BUCKET_NAME
 
 from minio import Minio
-from minio.error import S3Error
 
 # Kết nối tới MinIO
 client = Minio(
     "minio1:9000",  # hoặc minio1:9000 nếu trong cluster
-    access_key="admin",
-    secret_key="admin123",
-    secure=False
+    access_key=MINIO_ACCESS_KEY,
+    secret_key=MINIO_SECRET_KEY,
+    secure=MINIO_SECURE
 )
 
-bucket_name = "datawarehouse"
+bucket_name = DEFAULT_BUCKET_NAME
 
 # Tạo bucket nếu chưa có
 if not client.bucket_exists(bucket_name):
