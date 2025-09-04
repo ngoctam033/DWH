@@ -47,7 +47,7 @@ def clean_user_data(**context):
     bucket_name = params.get('bucket_name', 'datawarehouse')
     layer_in = params.get('layer_in', 'staging')
     # logical date lấy trong context, nếu không có thì lấy ngày hôm qua
-    logical_date = conf.get('logical_date')
+    logical_date = conf.get('logical_date', context.get('logical_date'))
 
     parquet_in = get_object_name(layer_in, channel, data_model, logical_date, file_type='parquet')
     folder_prefix = parquet_in.rsplit('/', 1)[0]  # Lấy folder chứa file parquet
