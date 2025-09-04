@@ -1,6 +1,7 @@
 from airflow import DAG
 from airflow.datasets import Dataset
 from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datetime import datetime, timedelta
 import duckdb
 import logging
@@ -176,7 +177,18 @@ with DAG(
         outlets = [LAZADA_ORDER_CLEANED_PARQUET]
     )
 
-    clean_data >> save_data
+    # Task cuối cùng: Trigger DAG daily_extract_order_items_lazada
+    trigger_extract_dag = TriggerDagRunOperator(
+        task_id='trigger_daily_extract_order_items_lazada',
+        trigger_dag_id='daily_extract_order_items_lazada',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=True,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    clean_data >> save_data >> trigger_extract_dag
 
 with DAG(
     dag_id='clean_order_data_tiki_with_duckdb',
