@@ -1,13 +1,12 @@
 # routers/load_warehouse.py
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from datetime import datetime
 from services.db_config import get_db_connection
 from services.gen_warehouse import generate_warehouse_data
 from sqlalchemy import text
 from decimal import Decimal
-from typing import Optional
 
 router = APIRouter()
 
