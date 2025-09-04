@@ -142,10 +142,7 @@ def get_object_name(layer, channel, data_model, logical_date, task_id=None, file
     date_str = yesterday.strftime('%Y-%m-%d')
     
     # Tạo tên file
-    if task_id:
-        file_name = f"{date_str}_{task_id}.{file_type}"
-    else:
-        file_name = f"{date_str}_data.{file_type}"
+    file_name = f"{date_str}_data.{file_type}"
 
     # Tạo đường dẫn đầy đủ theo cấu trúc thư mục phân vùng
     object_path = f"{layer}/{channel}/{data_model}/year={year}/month={month}/day={day}/{file_name}"
