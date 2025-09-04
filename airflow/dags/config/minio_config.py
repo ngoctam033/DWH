@@ -152,6 +152,16 @@ def get_object_name(layer, channel, data_model, logical_date, task_id=None, file
 
     return object_path
 
+def list_files_in_minio_dir(object_dir):
+    client = get_minio_client()
+    bucket_name=DEFAULT_BUCKET
+    # object_dir phải kết thúc bằng dấu "/"
+    if not object_dir.endswith('/'):
+        object_dir += '/'
+    objects = client.list_objects(bucket_name, prefix=object_dir, recursive=True)
+    file_paths = [obj.object_name for obj in objects]
+    return file_paths
+
 def upload_json_to_minio(json_data, object_name, bucket_name=DEFAULT_BUCKET):
     """
     Upload dữ liệu JSON lên MinIO. Nếu object_name đã tồn tại thì tự động thêm hậu tố để tránh ghi đè.
