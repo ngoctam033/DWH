@@ -85,10 +85,31 @@ if __name__ == "__main__":
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    parquet_out_local="cleaned_users.parquet"
-    parquet_in="cleaned/*/users/**/*.parquet"
+    data_sources = [
+        {
+            "name": "users",
+            "parquet_in": "cleaned/*/users/**/*.parquet",
+            "parquet_out_local": "output/cleaned_users.parquet"
+        },
+        {
+            "name": "orders",
+            "parquet_in": "cleaned/*/orders/**/*.parquet",
+            "parquet_out_local": "output/cleaned_orders.parquet"
+        },
+        {
+            "name": "orderchannels",
+            "parquet_in": "cleaned/*/order_channel/**/*.parquet",
+            "parquet_out_local": "output/cleaned_order_channel.parquet"
+        },
+        {
+            "name": "orderitems",
+            "parquet_in": "cleaned/*/order_items/**/*.parquet",
+            "parquet_out_local": "output/cleaned_order_items.parquet"
+        }
+    ]
     # Sử dụng phiên bản thông thường
-    clean_and_save_parquet(
-        parquet_in=parquet_in,
-        parquet_out_local=parquet_out_local
-    )
+    for source in data_sources:
+        clean_and_save_parquet(
+            parquet_in=source["parquet_in"],
+            parquet_out_local=source["parquet_out_local"]
+        )
