@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.cpython-312.pyc
 .Python
 env/
 venv/
@@ -84,4 +85,5 @@ credentials.py
 
 # Virtual environment
 .venv
-*.cpython-312.pyc
+
+dbt_project/
