@@ -65,9 +65,18 @@ with DAG(
         outlets=[LAZADA_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
     )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Task cuối cùng: Trigger DAG transform_lazada_order_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_lazada_order_to_parquet',
+        trigger_dag_id='transform_lazada_order_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=True,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 # DAG shopee
 with DAG(

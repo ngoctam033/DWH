@@ -306,7 +306,7 @@ with DAG(
             'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
             'channel': 'lazada',        # Truyền thêm thông tin kênh
         },
-        wait_for_completion=True,  # Không chờ DAG được trigger hoàn thành
+        wait_for_completion=True,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi

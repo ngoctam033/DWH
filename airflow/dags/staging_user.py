@@ -60,7 +60,7 @@ def get_yesterday_file_paths(**context):
     """
     conf = context['dag_run'].conf
     # logical date lấy trong context, nếu không có thì lấy ngày hôm qua
-    logical_date = conf.get('logical_date')
+    logical_date = conf.get('logical_date', context.get('logical_date'))
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
     if not logical_date:
         raise ValueError("logical_date không tồn tại trong context 1.")
