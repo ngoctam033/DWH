@@ -84,3 +84,4 @@ credentials.py
 
 # Virtual environment
 .venv
+*.cpython-312.pyc
