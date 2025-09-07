@@ -181,7 +181,7 @@ with DAG(
     dag_id='daily_extract_shopee_user',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
     catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
@@ -216,7 +216,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -226,7 +226,7 @@ with DAG(
     dag_id='daily_extract_tiktok_user',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
     catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
@@ -261,7 +261,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -271,7 +271,7 @@ with DAG(
     dag_id='daily_extract_tiki_user',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
     catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
@@ -306,7 +306,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -316,7 +316,7 @@ with DAG(
     dag_id='daily_extract_website_user',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
     catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
@@ -351,7 +351,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -361,7 +361,7 @@ with DAG(
     dag_id='daily_extract_lazada_user',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
     catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
@@ -396,7 +396,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=True,  # False: Không chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi

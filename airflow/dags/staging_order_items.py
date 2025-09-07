@@ -339,7 +339,7 @@ with DAG(
     dag_id='transform_lazada_order_items_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Lazada',
-    schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
+    #schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'lazada'],
@@ -394,7 +394,7 @@ with DAG(
     dag_id='transform_shopee_order_items_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Shopee',
-    schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
+    #schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'shopee'],
@@ -449,7 +449,7 @@ with DAG(
     dag_id='transform_tiki_order_items_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiki',
-    schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
+    #schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'tiki'],
@@ -504,7 +504,7 @@ with DAG(
     dag_id='transform_tiktok_order_items_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiktok',
-    schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
+    #schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'tiktok'],
@@ -559,7 +559,7 @@ with DAG(
     dag_id='transform_website_order_items_to_parquet',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Website',
-    schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
+    #schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['transform', 'parquet', 'website'],

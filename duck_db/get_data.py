@@ -31,7 +31,49 @@ def build_s3_path(bucket_name, path):
 # Hàm thuần túy để tạo truy vấn SQL
 def build_parquet_query(path):
     """Tạo câu truy vấn SQL để đọc parquet"""
-    return f"SELECT * FROM read_parquet('{path}', union_by_name=True)"
+    if "/orders/" in path:
+        return f"""
+            SELECT 
+                id, 
+                status, 
+                CASE 
+                    WHEN TRY_CAST(created_at AS DOUBLE) IS NOT NULL 
+                        AND CAST(created_at AS DOUBLE) BETWEEN 0 AND 32503680000 THEN  -- Phạm vi hợp lệ
+                        CAST(to_timestamp(CAST(created_at AS DOUBLE)) AS VARCHAR)
+                    ELSE CAST(created_at AS VARCHAR)  -- Ép kiểu giá trị gốc thành VARCHAR
+                END AS created_at,  -- Chuyển đổi timestamp hợp lệ
+                CASE 
+                    WHEN TRY_CAST(order_date AS DOUBLE) IS NOT NULL 
+                        AND CAST(order_date AS DOUBLE) BETWEEN 0 AND 32503680000 THEN  -- Phạm vi hợp lệ
+                        CAST(to_timestamp(CAST(order_date AS DOUBLE)) AS VARCHAR)
+                    ELSE CAST(order_date AS VARCHAR)  -- Ép kiểu giá trị gốc thành VARCHAR
+                END AS order_date,  -- Chuyển đổi timestamp hợp lệ
+                order_code, 
+                payment_id,
+                customer_id, 
+                shipping_id, 
+                total_price, 
+                shipping_fee, 
+                logistics_partner_id
+            FROM read_parquet('{path}', union_by_name=True)
+            ORDER BY created_at
+        """
+    if "/order_channel/" in path:
+        return f"""
+                    SELECT DISTINCT id, name, is_active
+                    FROM read_parquet('{path}', union_by_name=True)
+                """
+    if "/order_items/" in path:
+        return f"""
+                    SELECT * 
+                    FROM read_parquet('{path}', union_by_name=True)
+                """
+    if "/users/" in path:
+        return f"""
+                    SELECT * 
+                    FROM read_parquet('{path}', union_by_name=True)
+                """
+    raise ValueError("Đường dẫn không hợp lệ hoặc không được hỗ trợ")
 
 # Hàm với side effect rõ ràng để đọc dữ liệu
 def read_parquet_from_s3(conn, query):
@@ -63,21 +105,25 @@ def clean_and_save_parquet(
     bucket_name=DEFAULT_BUCKET_NAME
 ):
     """Đọc dữ liệu parquet từ S3, làm sạch và lưu xuống local"""
-    # Tạo kết nối
-    conn = create_s3_connection(S3_CONFIG)
-    
-    # Xây dựng và thực thi truy vấn
-    s3_path = build_s3_path(bucket_name, parquet_in)
-    query = build_parquet_query(s3_path)
-    df = read_parquet_from_s3(conn, query)
-    
-    # Log kết quả trung gian
-    logging.info(f"Số dòng sau khi đọc: {len(df)}")
-    
-    # Lưu kết quả
-    save_to_parquet(df, parquet_out_local)
-    
-    return df
+    try:
+        # Tạo kết nối
+        conn = create_s3_connection(S3_CONFIG)
+        
+        # Xây dựng và thực thi truy vấn
+        s3_path = build_s3_path(bucket_name, parquet_in)
+        query = build_parquet_query(s3_path)
+        df = read_parquet_from_s3(conn, query)
+        
+        # Log kết quả trung gian
+        logging.info(f"Số dòng sau khi đọc: {len(df)}")
+        
+        # Lưu kết quả
+        save_to_parquet(df, parquet_out_local)
+        
+        return df
+    except Exception as e:
+        logging.error(f"Lỗi xảy ra khi xử lý file {parquet_in}: {e}")
+        return None
 
 if __name__ == "__main__":
     # Thiết lập logging

@@ -121,9 +121,9 @@ with DAG(
     dag_id='clean_order_data_shopee_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['clean', 'duckdb', 'minio', 'shopee'],
     params={
         'channel': 'shopee',
@@ -146,15 +146,26 @@ with DAG(
         outlets = [SHOPEE_ORDER_CLEANED_PARQUET]
     )
 
-    clean_data >> save_data
+    # Task cuối cùng: Trigger DAG daily_extract_order_items_shopee
+    trigger_extract_dag = TriggerDagRunOperator(
+        task_id='trigger_daily_extract_order_items_shopee',
+        trigger_dag_id='daily_extract_order_items_shopee',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    clean_data >> save_data >> trigger_extract_dag
 
 with DAG(
     dag_id='clean_order_data_lazada_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['clean', 'duckdb', 'minio', 'lazada'],
     params={
         'channel': 'lazada',
@@ -184,7 +195,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=True,  # Chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -194,9 +205,9 @@ with DAG(
     dag_id='clean_order_data_tiki_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu đơn hàng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['clean', 'duckdb', 'minio', 'tiki'],
     params={
         'channel': 'tiki',
@@ -219,15 +230,26 @@ with DAG(
         outlets = [TIKI_ORDER_CLEANED_PARQUET]
     )
 
-    clean_data >> save_data
+    # Task cuối cùng: Trigger DAG daily_extract_order_items_tiki
+    trigger_extract_dag = TriggerDagRunOperator(
+        task_id='trigger_daily_extract_order_items_tiki',
+        trigger_dag_id='daily_extract_order_items_tiki',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    clean_data >> save_data >> trigger_extract_dag
 
 with DAG(
     dag_id='clean_order_data_tiktok_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu đơn hàng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['clean', 'duckdb', 'minio', 'tiktok'],
     params={
         'channel': 'tiktok',
@@ -250,15 +272,26 @@ with DAG(
         outlets = [TIKTOK_ORDER_CLEANED_PARQUET]
     )
 
-    clean_data >> save_data
+    # Task cuối cùng: Trigger DAG daily_extract_order_items_tiktok
+    trigger_extract_dag = TriggerDagRunOperator(
+        task_id='trigger_daily_extract_order_items_tiktok',
+        trigger_dag_id='daily_extract_order_items_tiktok',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    clean_data >> save_data >> trigger_extract_dag
 
 with DAG(
     dag_id='clean_order_data_website_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu đơn hàng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['clean', 'duckdb', 'minio', 'website'],
     params={
         'channel': 'website',
@@ -281,4 +314,15 @@ with DAG(
         outlets = [WEBSITE_ORDER_CLEANED_PARQUET]
     )
 
-    clean_data >> save_data
+    # Task cuối cùng: Trigger DAG daily_extract_order_items_website
+    trigger_extract_dag = TriggerDagRunOperator(
+        task_id='trigger_daily_extract_order_items_website',
+        trigger_dag_id='daily_extract_order_items_website',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    clean_data >> save_data >> trigger_extract_dag

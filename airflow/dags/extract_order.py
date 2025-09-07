@@ -37,9 +37,9 @@ with DAG(
     dag_id='daily_extract_lazada_order',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-order, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-order',
@@ -72,7 +72,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=True,  # Chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -83,9 +83,9 @@ with DAG(
     dag_id='daily_extract_shopee_order',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-order, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-order',
@@ -111,18 +111,27 @@ with DAG(
         outlets=[SHOPEE_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
     )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Task cuối cùng: Trigger DAG transform_shopee_order_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_shopee_order_to_parquet',
+        trigger_dag_id='transform_shopee_order_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 # DAG tiki
 with DAG(
     dag_id='daily_extract_tiki_order',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-order, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-order',
@@ -148,18 +157,27 @@ with DAG(
         outlets=[TIKI_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
     )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Task cuối cùng: Trigger DAG transform_tiki_order_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_tiki_order_to_parquet',
+        trigger_dag_id='transform_tiki_order_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 # DAG website
 with DAG(
     dag_id='daily_extract_website_order',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-order, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-order',
@@ -185,18 +203,27 @@ with DAG(
         outlets=[WEBSITE_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
     )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Task cuối cùng: Trigger DAG transform_website_order_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_website_order_to_parquet',
+        trigger_dag_id='transform_website_order_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
 
 # DAG tiktok
 with DAG(
     dag_id='daily_extract_tiktok_order',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-order, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 2 * * *',         # Lịch chạy: 02:00 mỗi ngày (crontab expression)
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-order',
@@ -222,6 +249,15 @@ with DAG(
         outlets=[TIKTOK_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiktok
     )
 
-    # Định nghĩa luồng thực thi (workflow) giữa các task
-    # Luồng đơn giản: fetch_json_task >> save_to_minio_task
-    fetch_json_task >> save_to_minio_task
+    # Task cuối cùng: Trigger DAG transform_tiktok_order_to_parquet
+    trigger_transform_dag = TriggerDagRunOperator(
+        task_id='trigger_transform_tiktok_order_to_parquet',
+        trigger_dag_id='transform_tiktok_order_to_parquet',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
+
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> trigger_transform_dag

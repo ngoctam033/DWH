@@ -20,5 +20,5 @@ def extract_user(
         return JSONResponse({"error": "Sai định dạng ngày. Định dạng đúng: YYYY-MM-DD"}, status_code=400)
 
     # Gọi hàm generate_customers với tham số từ client
-    users = generate_customers(num_customers=random.randint(20, 100),created_at=created_at_dt, order_channel=order_channel)
+    users = generate_customers(num_customers=random.randint(1, 10),created_at=created_at_dt, order_channel=order_channel)
     return JSONResponse(users)

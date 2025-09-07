@@ -86,6 +86,7 @@ def save_cleaned_order_data(**context):
         raise ValueError("Không tìm thấy dữ liệu đã làm sạch từ XCom")
 
     df_clean = pa.Table.from_pandas(pd.DataFrame(cleaned_data))
+    
     buffer = BytesIO()
     pq.write_table(df_clean, buffer)
     buffer.seek(0)
@@ -106,7 +107,7 @@ with DAG(
     dag_id='clean_order_items_data_lazada_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['clean', 'duckdb', 'minio', 'lazada'],
@@ -137,7 +138,7 @@ with DAG(
     dag_id='clean_order_items_data_shopee_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['clean', 'duckdb', 'minio', 'shopee'],
@@ -168,7 +169,7 @@ with DAG(
     dag_id='clean_order_items_data_tiki_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['clean', 'duckdb', 'minio', 'tiki'],
@@ -199,7 +200,7 @@ with DAG(
     dag_id='clean_order_items_data_tiki_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['clean', 'duckdb', 'minio', 'tiki'],
@@ -230,7 +231,7 @@ with DAG(
     dag_id='clean_order_items_data_tiktok_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['clean', 'duckdb', 'minio', 'tiktok'],
@@ -262,7 +263,7 @@ with DAG(
     dag_id='clean_order_items_data_website_with_duckdb',
     default_args=default_args,
     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    schedule='0 4 * * *',
+    #schedule='0 4 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['clean', 'duckdb', 'minio', 'website'],

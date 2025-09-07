@@ -37,16 +37,16 @@ def extract_order(
             query = """
             SELECT 
                 id, order_code, created_at, order_date, status, total_price, 
-                shipping_cost, payment_id, shipping_id,
+                payment_id, shipping_id,
                 customer_id, logistics_partner_id
             FROM orders
-            --WHERE DATE(order_date) = DATE(:created_at)
+            WHERE DATE(order_date) = DATE(:created_at)
             """
             
             # Thêm điều kiện lọc theo kênh bán hàng nếu có
             params = {"created_at": created_at_dt}
             if order_channel and order_channel.lower() != "all":
-                query += " WHERE order_channel_id = (SELECT id FROM order_channel WHERE LOWER(name) = LOWER(:order_channel))"
+                query += " AND order_channel_id = (SELECT id FROM order_channel WHERE LOWER(name) = LOWER(:order_channel))"
                 params["order_channel"] = order_channel
             
             # In log câu lệnh SQL cuối cùng được sử dụng
@@ -62,7 +62,15 @@ def extract_order(
             orders = []
             
             # Danh sách các giá trị status không đồng nhất
-            status_variations = ["đã giao", "Đã Giao", "DA GIAO", "delivered", "DONE", "Success", "complete", "completed", "hoàn thành", None]
+            status_variations = {
+                                "DONE": ["COMPLETED", "FINISHED", "SUCCESSFUL"],  # Hoàn thành
+                                "completed": ["DONE", "FINISHED", "SUCCESSFUL"],  # Hoàn thành
+                                "DELIVERED": ["FULFILLED", "DELIVERY_SUCCESS", "RECEIVED"],  # Đã giao hàng
+                                "CANCELLED": ["VOIDED", "TERMINATED", "ORDER_CANCELLED"],  # Đã hủy
+                                "PROCESSING": ["IN_PROGRESS", "UNDER_PROCESS", "BEING_PREPARED"],  # Đang xử lý
+                                "SHIPPED": ["DISPATCHED", "SENT_FROM_WAREHOUSE", "OUT_FOR_DELIVERY"],  # Đã gửi đi
+                                "RETURNED": ["REFUNDED", "SENT_BACK", "RETURN_INITIATED"]  # Đã trả lại
+                            }
             
             # Tạo dữ liệu bẩn cho các record
             for i, row in enumerate(result):
@@ -90,21 +98,17 @@ def extract_order(
                             order_dict[key] = value.isoformat()  # ISO format
                     
                     # 3. Vấn đề thiếu dữ liệu và dữ liệu null không nhất quán
-                    elif key == 'shipping_cost':
-                        if i % 4 == 0:  # 25% dữ liệu bị lỗi
-                            order_dict[key] = None  # Giá trị null
-                        elif i % 7 == 0:
-                            order_dict[key] = "N/A"  # Chuỗi N/A thay vì số
-                        elif i % 9 == 0:
-                            pass  # Cố tình bỏ qua trường này
-                        else:
-                            order_dict[key] = float(value) if value is not None else 0.0
+
                     
                     # 4. Vấn đề không nhất quán về các giá trị enum
                     elif key == 'status':
                         # Thay thế status bằng các biến thể khác nhau
                         if i % 3 == 0:  # 33% dữ liệu status bị thay đổi
-                            order_dict[key] = random.choice(status_variations)
+                            # Chọn ngẫu nhiên một giá trị thay thế từ danh sách tương ứng
+                            if value in status_variations:
+                                order_dict[key] = random.choice(status_variations[value])
+                            else:
+                                order_dict[key] = value  # Nếu không tìm thấy key, giữ nguyên giá trị gốc
                         else:
                             order_dict[key] = value
                     
@@ -134,9 +138,7 @@ def extract_order(
                     order_dict['_metadata'] = {"source": "system", "timestamp": datetime.now().isoformat()}
                 
                 # 8. Đổi tên trường cho một số bản ghi
-                if i % 9 == 0:
-                    if 'shipping_cost' in order_dict:
-                        order_dict['shipping_fee'] = order_dict.pop('shipping_cost')
+
                 
                 orders.append(order_dict)
             

@@ -82,7 +82,7 @@ def save_order_channel(**context):
 with DAG(
     dag_id='extract_order_channel',
     default_args=default_args,
-    schedule=None,
+    #schedule=None,
     catchup=False,
     tags=['extract', 'order_channel'],
     description='Extract toàn bộ bảng order_channel từ PostgreSQL',

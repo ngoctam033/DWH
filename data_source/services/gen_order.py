@@ -136,17 +136,17 @@ def create_one_order(order_date = None):
                 })
             
             # 11. Tính phí vận chuyển
-            shipping_costs = {1: 30000, 2: 50000, 3: 70000, 4: 20000}  # Giá cơ bản theo phương thức
-            base_shipping = shipping_costs.get(shipping_method_id, 30000)
+            # shipping_costs = {1: 30000, 2: 50000, 3: 70000, 4: 20000}  # Giá cơ bản theo phương thức
+            # base_shipping = shipping_costs.get(shipping_method_id, 30000)
             
             # Miễn phí cho đơn > 1tr (Standard/Economy)
-            if total_amount >= 1000000 and shipping_method_id in [1, 4]:
-                shipping_cost = 0
-            # Giảm 50% cho đơn từ 500k-1tr
-            elif 500000 <= total_amount < 1000000 and shipping_method_id in [1, 4]:
-                shipping_cost = int(base_shipping * 0.5)
-            else:
-                shipping_cost = base_shipping
+            # if total_amount >= 1000000 and shipping_method_id in [1, 4]:
+            #     shipping_cost = 0
+            # # Giảm 50% cho đơn từ 500k-1tr
+            # elif 500000 <= total_amount < 1000000 and shipping_method_id in [1, 4]:
+            #     shipping_cost = int(base_shipping * 0.5)
+            # else:
+            #     shipping_cost = base_shipping
             
             # 12. Tính lợi nhuận (20-30% giá trị đơn hàng)
             
@@ -167,7 +167,7 @@ def create_one_order(order_date = None):
                 'is_expedited': is_expedited,
                 'shipping_method_id': shipping_method_id,
                 'tracking_number': tracking_number,
-                'shipping_cost': shipping_cost,
+                # 'shipping_cost': shipping_cost,
                 'shipping_status': final_status,
                 'is_active': True,
                 'created_at': created_date,
@@ -178,10 +178,10 @@ def create_one_order(order_date = None):
                 result = conn.execute(
                     text("""
                     INSERT INTO shipment (logistics_partner_id, warehouse_id, is_expedited, 
-                                        shipping_method_id, tracking_number, shipping_cost, 
+                                        shipping_method_id, tracking_number, 
                                         shipping_status, is_active, created_at, updated_at)
                     VALUES (:logistics_partner_id, :warehouse_id, :is_expedited, 
-                            :shipping_method_id, :tracking_number, :shipping_cost, 
+                            :shipping_method_id, :tracking_number, 
                             :shipping_status, :is_active, :created_at, :updated_at)
                     RETURNING id
                     """), 
@@ -233,9 +233,9 @@ def create_one_order(order_date = None):
                 'order_code': order_code,
                 'order_date': order_date,
                 'status': final_status,
-                'shipping_cost': shipping_cost,
+                # 'shipping_cost': shipping_cost,
                 'total_price': total_amount,
-                'total_shipping_cost': shipping_cost,
+                # 'total_shipping_cost': shipping_cost,
                 'created_at': now,
                 'updated_at': now,
                 'is_active': True
@@ -246,12 +246,12 @@ def create_one_order(order_date = None):
                     text("""
                     INSERT INTO orders (customer_id, payment_id, shipping_id, discount_id, location_id, 
                                        logistics_partner_id, order_channel_id, order_code, order_date, 
-                                       status, shipping_cost, is_active, created_at, updated_at,
-                                       total_price, total_shipping_cost)
+                                       status, is_active, created_at, updated_at,
+                                       total_price)
                     VALUES (:customer_id, :payment_id, :shipping_id, :discount_id, :location_id,
                             :logistics_partner_id, :order_channel_id, :order_code, :order_date, 
-                            :status, :shipping_cost, :is_active, :created_at, :updated_at,
-                            :total_price, :total_shipping_cost)
+                            :status, :is_active, :created_at, :updated_at,
+                            :total_price)
                     RETURNING id
                     """),
                     order_data
@@ -439,7 +439,7 @@ def create_one_order(order_date = None):
                 'order_date': order_date,
                 'final_status': final_status,
                 'total_amount': total_amount,
-                'shipping_cost': shipping_cost,
+                # 'shipping_cost': shipping_cost,
                 'items': [
                     {
                         'id': item_id,
