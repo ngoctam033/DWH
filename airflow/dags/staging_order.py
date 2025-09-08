@@ -199,8 +199,8 @@ def parse_json_to_table(**context):
                 # Lọc chỉ lấy các trường cần thiết
                 required_fields = [
                     'id', 'profit', 'status', 'created_at', 'order_code', 'order_date',
-                    'payment_id', 'customer_id', 'shipping_id', 'total_price',
-                    'shipping_fee', 'logistics_partner_id'
+                    'payment_id', 'customer_code', 'shipping_id', 'total_price',
+                    'shipping_cost', 'logistics_partner_id'
                 ]
                 filtered_orders = []
                 for order in order_list:
