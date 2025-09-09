@@ -20,51 +20,69 @@ def extract_order(
         created_at_dt = datetime.strptime(created_at, "%Y-%m-%d")
     except Exception:
         return JSONResponse({"error": "Sai định dạng ngày. Định dạng đúng: YYYY-MM-DD"}, status_code=400)
-    
-    # Gọi hàm create_multiple_orders để tạo đơn hàng
-    num_orders = random.randint(1, 100)
-    created_orders = create_multiple_orders(num_orders=num_orders, order_date=created_at_dt)
-    
-    # Số lượng đơn hàng đã tạo
-    created_count = len(created_orders) if created_orders else num_orders
 
     try:
         # Kết nối đến cơ sở dữ liệu
         engine = get_db_connection()
-        
+
         with engine.connect() as conn:
+            # Kiểm tra xem đã có đơn hàng nào trong ngày tương ứng chưa
+            check_query = """
+                SELECT COUNT(*)
+                FROM orders
+                WHERE DATE(order_date) = DATE(:created_at)
+            """
+            existing_orders_count = conn.execute(text(check_query), {"created_at": created_at_dt}).scalar()
+
+            # Nếu đã có đơn hàng, không cần tạo thêm
+            if existing_orders_count > 0:
+                created_orders = []
+                created_count = 0
+            else:
+                # Gọi hàm create_multiple_orders để tạo đơn hàng
+                num_orders = random.randint(1, 100)
+                created_orders = create_multiple_orders(num_orders=num_orders, order_date=created_at_dt)
+                created_count = len(created_orders) if created_orders else num_orders
+
             # Xây dựng truy vấn SQL - chỉ lấy dữ liệu từ bảng orders
             query = """
-            SELECT 
-                id, order_code, created_at, order_date, status, total_price, 
-                payment_id, shipping_id,
-                customer_id, logistics_partner_id
-            FROM orders
-            WHERE DATE(order_date) = DATE(:created_at)
+                SELECT 
+                    o.id, 
+                    o.order_code, 
+                    o.created_at, 
+                    o.order_date, 
+                    o.status, 
+                    o.total_price, 
+                    o.payment_id, 
+                    o.shipping_id, 
+                    o.shipping_cost,
+                    c.customer_code,  -- Lấy customer_code từ bảng customer
+                    o.logistics_partner_id
+                FROM orders o
+                JOIN customers c ON o.customer_id = c.id  -- Liên kết với bảng customer qua khóa ngoại
+                WHERE DATE(o.order_date) = DATE(:created_at)
             """
-            
+
             # Thêm điều kiện lọc theo kênh bán hàng nếu có
             params = {"created_at": created_at_dt}
             if order_channel and order_channel.lower() != "all":
-                query += " AND order_channel_id = (SELECT id FROM order_channel WHERE LOWER(name) = LOWER(:order_channel))"
+                query += " AND o.order_channel_id = (SELECT id FROM order_channel WHERE LOWER(name) = LOWER(:order_channel))"
                 params["order_channel"] = order_channel
-            
+
             # In log câu lệnh SQL cuối cùng được sử dụng
-            # Hiển thị giá trị thực tế của tham số để debug
             compiled_query = text(query).bindparams(**params)
             compiled_sql = str(compiled_query.compile(compile_kwargs={"literal_binds": True}))
             print(f"===== SQL QUERY EXECUTED =====\n{compiled_sql}\n===========================")
-            
+
             # Thực thi truy vấn
             result = conn.execute(text(query), params)
-            
+
             # Chuyển kết quả thành danh sách các từ điển và cố tình tạo ra dữ liệu "bẩn"
             orders = []
             
             # Danh sách các giá trị status không đồng nhất
             status_variations = {
                                 "DONE": ["COMPLETED", "FINISHED", "SUCCESSFUL"],  # Hoàn thành
-                                "completed": ["DONE", "FINISHED", "SUCCESSFUL"],  # Hoàn thành
                                 "DELIVERED": ["FULFILLED", "DELIVERY_SUCCESS", "RECEIVED"],  # Đã giao hàng
                                 "CANCELLED": ["VOIDED", "TERMINATED", "ORDER_CANCELLED"],  # Đã hủy
                                 "PROCESSING": ["IN_PROGRESS", "UNDER_PROCESS", "BEING_PREPARED"],  # Đang xử lý
