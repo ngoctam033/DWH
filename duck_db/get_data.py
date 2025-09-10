@@ -66,10 +66,25 @@ def build_parquet_query(path):
                 """
     if "/order_items/" in path:
         return f"""
-                    SELECT * 
+                    SELECT 
+                            *,
+                            CASE 
+                                WHEN TRY_CAST(unit_price AS DOUBLE) IS NULL OR TRY_CAST(discount_amount AS DOUBLE) IS NULL THEN NULL
+                                ELSE GREATEST(
+                                    ROUND((CAST(COALESCE(TRY_CAST(unit_price AS DOUBLE), 0) AS DOUBLE) - 
+                                        CAST(COALESCE(TRY_CAST(discount_amount AS DOUBLE), 0) AS DOUBLE)) * 
+                                        (1 - (0.2 + random() * 0.1))),
+                                    0
+                                )
+                            END AS cost_price
                     FROM read_parquet('{path}', union_by_name=True)
                 """
     if "/users/" in path:
+        return f"""
+                    SELECT * 
+                    FROM read_parquet('{path}', union_by_name=True)
+                """
+    if "/product/" in path:
         return f"""
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
@@ -152,6 +167,11 @@ if __name__ == "__main__":
             "name": "orderitems",
             "parquet_in": "cleaned/*/order_items/**/*.parquet",
             "parquet_out_local": "output/cleaned_order_items.parquet"
+        },
+        {
+            "name": "product",
+            "parquet_in": "cleaned/*/product/**/*.parquet",
+            "parquet_out_local": "output/cleaned_product.parquet"
         }
     ]
     # Sử dụng phiên bản thông thường
