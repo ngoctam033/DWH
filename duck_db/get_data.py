@@ -39,7 +39,7 @@ def build_parquet_query(path):
                 CASE 
                     WHEN TRY_CAST(created_at AS DOUBLE) IS NOT NULL 
                         AND CAST(created_at AS DOUBLE) BETWEEN 0 AND 32503680000 THEN  -- Phạm vi hợp lệ
-                        CAST(to_timestamp(CAST(created_at AS DOUBLE)) AS VARCHAR)
+                        CAST(to_timestamp(CAST(created_at AS DOUBLE)) AT TIME ZONE 'UTC' AS VARCHAR)
                     ELSE CAST(created_at AS VARCHAR)  -- Ép kiểu giá trị gốc thành VARCHAR
                 END AS created_at,  -- Chuyển đổi timestamp hợp lệ
                 CASE 
@@ -49,11 +49,12 @@ def build_parquet_query(path):
                     ELSE CAST(order_date AS VARCHAR)  -- Ép kiểu giá trị gốc thành VARCHAR
                 END AS order_date,  -- Chuyển đổi timestamp hợp lệ
                 order_code, 
+                order_channel,
                 payment_id,
-                customer_id, 
+                customer_code, 
                 shipping_id, 
                 total_price, 
-                shipping_fee, 
+                shipping_cost, 
                 logistics_partner_id
             FROM read_parquet('{path}', union_by_name=True)
             ORDER BY created_at
