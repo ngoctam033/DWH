@@ -83,7 +83,7 @@ def create_one_order(order_date = None):
 
             # 7. Chọn số lượng sản phẩm từ 1-5
             num_items = random.randint(1, 5)
-            products_result = conn.execute(text(f"SELECT id FROM product ORDER BY RANDOM() LIMIT {num_items}"))
+            products_result = conn.execute(text(f"SELECT id, price FROM product ORDER BY RANDOM() LIMIT {num_items}"))
             products = products_result.fetchall()
             print(f"Selected products: {products}")
             if not products:
@@ -115,14 +115,14 @@ def create_one_order(order_date = None):
             
             for product_row in products:
                 product_id = product_row[0]
-                unit_price = random.randint(50000, 500000)  # Giá sản phẩm từ 50k - 500k
+                unit_price = product_row[1]
                 quantity = random.randint(1, 3)  # Mua 1-3 sản phẩm mỗi loại
                 
                 # Áp dụng giảm giá cho 30% sản phẩm
                 discount_amount = 0
                 if random.random() < 0.3:
                     discount_percent = random.uniform(0.05, 0.2)  # Giảm 5-20%
-                    discount_amount = round(unit_price * discount_percent)
+                    discount_amount = round(float(unit_price) * discount_percent)
                 
                 amount = (unit_price - discount_amount) * quantity
                 total_amount += amount
@@ -136,17 +136,17 @@ def create_one_order(order_date = None):
                 })
             
             # 11. Tính phí vận chuyển
-            # shipping_costs = {1: 30000, 2: 50000, 3: 70000, 4: 20000}  # Giá cơ bản theo phương thức
-            # base_shipping = shipping_costs.get(shipping_method_id, 30000)
+            shipping_costs = {1: 30000, 2: 50000, 3: 70000, 4: 20000}  # Giá cơ bản theo phương thức
+            base_shipping = shipping_costs.get(shipping_method_id, 30000)
             
             # Miễn phí cho đơn > 1tr (Standard/Economy)
-            # if total_amount >= 1000000 and shipping_method_id in [1, 4]:
-            #     shipping_cost = 0
-            # # Giảm 50% cho đơn từ 500k-1tr
-            # elif 500000 <= total_amount < 1000000 and shipping_method_id in [1, 4]:
-            #     shipping_cost = int(base_shipping * 0.5)
-            # else:
-            #     shipping_cost = base_shipping
+            if total_amount >= 1000000 and shipping_method_id in [1, 4]:
+                shipping_cost = 0
+            # Giảm 50% cho đơn từ 500k-1tr
+            elif 500000 <= total_amount < 1000000 and shipping_method_id in [1, 4]:
+                shipping_cost = int(base_shipping * 0.5)
+            else:
+                shipping_cost = base_shipping
             
             # 12. Tính lợi nhuận (20-30% giá trị đơn hàng)
             
@@ -167,7 +167,7 @@ def create_one_order(order_date = None):
                 'is_expedited': is_expedited,
                 'shipping_method_id': shipping_method_id,
                 'tracking_number': tracking_number,
-                # 'shipping_cost': shipping_cost,
+                'shipping_cost': shipping_cost,
                 'shipping_status': final_status,
                 'is_active': True,
                 'created_at': created_date,
@@ -178,10 +178,10 @@ def create_one_order(order_date = None):
                 result = conn.execute(
                     text("""
                     INSERT INTO shipment (logistics_partner_id, warehouse_id, is_expedited, 
-                                        shipping_method_id, tracking_number, 
+                                        shipping_method_id, tracking_number, shipping_cost,
                                         shipping_status, is_active, created_at, updated_at)
                     VALUES (:logistics_partner_id, :warehouse_id, :is_expedited, 
-                            :shipping_method_id, :tracking_number, 
+                            :shipping_method_id, :tracking_number, :shipping_cost,
                             :shipping_status, :is_active, :created_at, :updated_at)
                     RETURNING id
                     """), 

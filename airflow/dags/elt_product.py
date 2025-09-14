@@ -83,7 +83,7 @@ with DAG(
     dag_id='extract_product',
     default_args=default_args,
     #schedule=None,
-    catchup=False,
+    catchup=True,
     tags=['extract', 'product'],
     description='Extract toàn bộ bảng product từ PostgreSQL',
     params={

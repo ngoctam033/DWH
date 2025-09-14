@@ -45,16 +45,16 @@ def build_parquet_query(path):
                 CASE 
                     WHEN TRY_CAST(order_date AS DOUBLE) IS NOT NULL 
                         AND CAST(order_date AS DOUBLE) BETWEEN 0 AND 32503680000 THEN  -- Phạm vi hợp lệ
-                        CAST(to_timestamp(CAST(order_date AS DOUBLE)) AS VARCHAR)
+                        CAST(to_timestamp(CAST(order_date AS DOUBLE)) AT TIME ZONE 'UTC' AS VARCHAR)
                     ELSE CAST(order_date AS VARCHAR)  -- Ép kiểu giá trị gốc thành VARCHAR
                 END AS order_date,  -- Chuyển đổi timestamp hợp lệ
-                order_code, 
+                order_code,
                 order_channel,
                 payment_id,
                 customer_code, 
                 shipping_id, 
                 total_price, 
-                shipping_cost, 
+                --shipping_cost, 
                 logistics_partner_id
             FROM read_parquet('{path}', union_by_name=True)
             ORDER BY created_at
@@ -85,6 +85,16 @@ def build_parquet_query(path):
                     FROM read_parquet('{path}', union_by_name=True)
                 """
     if "/product/" in path:
+        return f"""
+                    SELECT * 
+                    FROM read_parquet('{path}', union_by_name=True)
+                """
+    if "/geo_location/" in path:
+        return f"""
+                    SELECT * 
+                    FROM read_parquet('{path}', union_by_name=True)
+                """
+    if "/payment/" in path:
         return f"""
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
@@ -150,12 +160,12 @@ if __name__ == "__main__":
     data_sources = [
         {
             "name": "users",
-            "parquet_in": "cleaned/*/users/**/*.parquet",
+            "parquet_in": "staging/*/users/**/*.parquet",
             "parquet_out_local": "output/cleaned_users.parquet"
         },
         {
             "name": "orders",
-            "parquet_in": "cleaned/*/orders/**/*.parquet",
+            "parquet_in": "staging/*/orders/**/*.parquet",
             "parquet_out_local": "output/cleaned_orders.parquet"
         },
         {
@@ -165,14 +175,24 @@ if __name__ == "__main__":
         },
         {
             "name": "orderitems",
-            "parquet_in": "cleaned/*/order_items/**/*.parquet",
+            "parquet_in": "staging/*/order_items/**/*.parquet",
             "parquet_out_local": "output/cleaned_order_items.parquet"
         },
         {
             "name": "product",
             "parquet_in": "cleaned/*/product/**/*.parquet",
             "parquet_out_local": "output/cleaned_product.parquet"
-        }
+        },
+        {
+            "name": "geo_location",
+            "parquet_in": "cleaned/*/geo_location/**/*.parquet",
+            "parquet_out_local": "output/cleaned_geo_location.parquet"
+        },
+        {
+            "name": "payment",
+            "parquet_in": "cleaned/*/payment/**/*.parquet",
+            "parquet_out_local": "output/cleaned_payment.parquet"
+        },
     ]
     # Sử dụng phiên bản thông thường
     for source in data_sources:

@@ -79,11 +79,12 @@ def get_order_items(**context):
         raise AirflowFailException("Danh sách order trống")
 
     # Lấy các tham số
+    conf = context['dag_run'].conf
     params = context.get('params', {})
     channel = params.get('channel')
     bucket_name = params.get('bucket_name', DEFAULT_BUCKET)
-    logical_date = context.get('logical_date')
-    
+    logical_date = conf.get('logical_date', context.get('logical_date'))
+    logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
     # Chuẩn bị các tham số
     api_url = "http://data_source:8000/extract-order-items"  # Thay thế bằng URL thực tế của API
     order_codes = [item['order_code'] for item in order_list if 'order_code' in item]
@@ -206,14 +207,14 @@ with DAG(
     dag_id='daily_extract_order_items_lazada',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Lazada',
-    #schedule='0 3 * * *',
+    # schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['elt', 'parquet', 'lazada'],
     params={
         'channel': 'lazada',
         'layer_inlets': 'cleaned',
-        'layer_in': 'cleaned',
+        'layer_in': 'staging',
         'file_type': 'parquet',
         'data_model': 'orders'
     }
@@ -246,9 +247,9 @@ with DAG(
     dag_id='daily_extract_order_items_shopee',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Shopee',
-    #schedule='0 3 * * *',
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['elt', 'parquet', 'shopee'],
     params={
         'channel': 'shopee',
@@ -286,9 +287,9 @@ with DAG(
     dag_id='daily_extract_order_items_tiki',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiki',
-    #schedule='0 3 * * *',
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['elt', 'parquet', 'tiki'],
     params={
         'channel': 'tiki',
@@ -326,9 +327,9 @@ with DAG(
     dag_id='daily_extract_order_items_tiktok',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiktok',
-    #schedule='0 3 * * *',
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['elt', 'parquet', 'tiktok'],
     params={
         'channel': 'tiktok',
@@ -366,9 +367,9 @@ with DAG(
     dag_id='daily_extract_order_items_website',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Website',
-    #schedule='0 3 * * *',
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['elt', 'parquet', 'website'],
     params={
         'channel': 'website',

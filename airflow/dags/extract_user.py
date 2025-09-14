@@ -183,7 +183,7 @@ with DAG(
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
     schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-user',
@@ -228,7 +228,7 @@ with DAG(
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
     schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-user',
@@ -273,7 +273,7 @@ with DAG(
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
     schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-user',
@@ -318,7 +318,7 @@ with DAG(
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
     schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-user',
@@ -363,7 +363,7 @@ with DAG(
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
     schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    catchup=True,                # False: không chạy các DAG trong quá khứ khi restart Airflow
     params={
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-user',

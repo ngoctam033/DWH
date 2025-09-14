@@ -387,7 +387,7 @@ def convert_to_parquet_and_save(**context):
     """
     # Lấy user_list từ task parse_json_to_table
     user_list = context['ti'].xcom_pull(task_ids='parse_json_to_table', key='parsed_tables')
-    
+    conf = context['dag_run'].conf
     if not user_list:
         error_msg = "Không tìm thấy user_list từ task trước"
         logging.warning(error_msg)  # Đổi từ logging.error sang logging.warning
@@ -395,7 +395,7 @@ def convert_to_parquet_and_save(**context):
         # raise ValueError(error_msg)
     
     # Lấy logical_date từ context
-    logical_date = context.get('logical_date', datetime.now())
+    logical_date = conf.get('logical_date', context.get('logical_date'))
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
     # Lấy tham số từ context
     params = context.get('params', {})
@@ -475,7 +475,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Shopee',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['transform', 'parquet', 'shopee'],
     params={
         'channel': 'shopee',
@@ -510,18 +510,17 @@ with DAG(
         outlets=[SHOPEE_USER_PARQUET],
     )
     # Task cuối cùng: Trigger DAG clean_user_data_shopee_with_duckdb
-    trigger_clean_dag = TriggerDagRunOperator(
-        task_id='trigger_clean_user_data_shopee',
-        trigger_dag_id='clean_user_data_shopee_with_duckdb',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
-            'channel': 'shopee',        # Truyền thêm thông tin kênh
-        },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
-    )
+    # trigger_clean_dag = TriggerDagRunOperator(
+    #     task_id='trigger_clean_user_data_shopee',
+    #     trigger_dag_id='clean_user_data_shopee_with_duckdb',  # ID của DAG cần trigger
+    #     conf={
+    #         'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
+    #     },
+    #     wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    # )
 
     # Định nghĩa luồng thực thi
-    get_file_path >> download_file >> parse_json >> convert_to_parquet >> trigger_clean_dag
+    get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho Tiktok
 with DAG(
@@ -530,7 +529,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiktok',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['transform', 'parquet', 'tiktok'],
     params={
         'channel': 'tiktok',
@@ -566,18 +565,17 @@ with DAG(
     )
 
     # Task cuối cùng: Trigger DAG clean_user_data_tiktok_with_duckdb
-    trigger_clean_dag = TriggerDagRunOperator(
-        task_id='trigger_clean_user_data_tiktok',
-        trigger_dag_id='clean_user_data_tiktok_with_duckdb',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
-            'channel': 'tiktok',        # Truyền thêm thông tin kênh
-        },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
-    )
+    # trigger_clean_dag = TriggerDagRunOperator(
+    #     task_id='trigger_clean_user_data_tiktok',
+    #     trigger_dag_id='clean_user_data_tiktok_with_duckdb',  # ID của DAG cần trigger
+    #     conf={
+    #         'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
+    #     },
+    #     wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    # )
 
     # Định nghĩa luồng thực thi
-    get_file_path >> download_file >> parse_json >> convert_to_parquet >> trigger_clean_dag
+    get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho Lazada
 with DAG(
@@ -586,7 +584,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Lazada',
     #schedule='0 3 * * *',         # Lịch chạy: 03:00 mỗi ngày (crontab expression)
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['transform', 'parquet', 'lazada'],
     params={
         'channel': 'lazada',
@@ -622,18 +620,17 @@ with DAG(
     )
 
     # Task cuối cùng: Trigger DAG clean_user_data_lazada_with_duckdb
-    trigger_clean_dag = TriggerDagRunOperator(
-        task_id='trigger_clean_user_data_lazada',
-        trigger_dag_id='clean_user_data_lazada_with_duckdb',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
-            'channel': 'lazada',        # Truyền thêm thông tin kênh
-        },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
-    )
+    # trigger_clean_dag = TriggerDagRunOperator(
+    #     task_id='trigger_clean_user_data_lazada',
+    #     trigger_dag_id='clean_user_data_lazada_with_duckdb',  # ID của DAG cần trigger
+    #     conf={
+    #         'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
+    #     },
+    #     wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    # )
 
     # Định nghĩa luồng thực thi
-    get_file_path >> download_file >> parse_json >> convert_to_parquet >> trigger_clean_dag
+    get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho Tiki
 with DAG(
@@ -642,7 +639,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiki',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['transform', 'parquet', 'tiki'],
     params={
         'channel': 'tiki',
@@ -678,18 +675,17 @@ with DAG(
     )
 
     # Task cuối cùng: Trigger DAG clean_user_data_tiki_with_duckdb
-    trigger_clean_dag = TriggerDagRunOperator(
-        task_id='trigger_clean_user_data_tiki',
-        trigger_dag_id='clean_user_data_tiki_with_duckdb',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
-            'channel': 'tiki',        # Truyền thêm thông tin kênh
-        },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
-    )
+    # trigger_clean_dag = TriggerDagRunOperator(
+    #     task_id='trigger_clean_user_data_tiki',
+    #     trigger_dag_id='clean_user_data_tiki_with_duckdb',  # ID của DAG cần trigger
+    #     conf={
+    #         'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
+    #     },
+    #     wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    # )
 
     # Định nghĩa luồng thực thi
-    get_file_path >> download_file >> parse_json >> convert_to_parquet >> trigger_clean_dag
+    get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho website
 with DAG(
@@ -698,7 +694,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Website',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=False,
+    catchup=True,
     tags=['transform', 'parquet', 'website'],
     params={
         'channel': 'website',
@@ -734,15 +730,14 @@ with DAG(
     )
 
     # Task cuối cùng: Trigger DAG clean_user_data_website_with_duckdb
-    trigger_clean_dag = TriggerDagRunOperator(
-        task_id='trigger_clean_user_data_website',
-        trigger_dag_id='clean_user_data_website_with_duckdb',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
-            'channel': 'website',        # Truyền thêm thông tin kênh
-        },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
-    )
+    # trigger_clean_dag = TriggerDagRunOperator(
+    #     task_id='trigger_clean_user_data_website',
+    #     trigger_dag_id='clean_user_data_website_with_duckdb',  # ID của DAG cần trigger
+    #     conf={
+    #         'logical_date': '{{ ds }}',  # Truyền logical_date nếu cần
+    #     },
+    #     wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    # )
 
     # Định nghĩa luồng thực thi
-    get_file_path >> download_file >> parse_json >> convert_to_parquet >> trigger_clean_dag
+    get_file_path >> download_file >> parse_json >> convert_to_parquet

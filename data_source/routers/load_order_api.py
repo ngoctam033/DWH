@@ -55,7 +55,6 @@ def extract_order(
                     o.total_price, 
                     o.payment_id, 
                     o.shipping_id, 
-                    o.shipping_cost,
                     c.customer_code,  -- Lấy customer_code từ bảng customer
                     o.logistics_partner_id
                 FROM orders o
@@ -171,14 +170,15 @@ def extract_order(
             
             # 10. Thêm một số bản ghi hoàn toàn sai định dạng
             if len(orders) > 0 and orders[0].get('id') is not None:
-                # Lấy một ID thực từ bản ghi đầu tiên để đảm bảo ID là giá trị thực từ database
-                sample_id = orders[0].get('id')
-                weird_record = {
-                    "id": sample_id,  # Sử dụng ID thực từ database
-                    "order_date": "25/13/2025",  # Ngày không hợp lệ
-                    "total_price": "free",
-                }
-                orders.append(weird_record)
+                # # Lấy một ID thực từ bản ghi đầu tiên để đảm bảo ID là giá trị thực từ database
+                # sample_id = orders[0].get('id')
+                # weird_record = {
+                #     "id": sample_id,  # Sử dụng ID thực từ database
+                #     "order_date": "25/13/2025",  # Ngày không hợp lệ
+                #     "total_price": "free",
+                # }
+                # orders.append(weird_record)
+                pass
             # In ra kích thước của orders
             print(f"Kích thước của orders: {len(orders)}")
             # Thay đổi cấu trúc JSON tùy thuộc vào order_channel để mô phỏng các nguồn dữ liệu khác nhau
