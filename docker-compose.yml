@@ -10,7 +10,7 @@ x-airflow-common:
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
@@ -43,7 +43,7 @@ services:
       interval: 10s
       retries: 5
       start_period: 5s
-    restart: always
+    restart: no
     ports:
       - "5435:5432"
     networks:
@@ -60,7 +60,7 @@ services:
       timeout: 30s
       retries: 50
       start_period: 30s
-    restart: always
+    restart: no
     networks:
       - dwh_network
 
@@ -76,7 +76,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    restart: no
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -94,7 +94,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    restart: no
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -112,7 +112,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    restart: no
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -135,7 +135,7 @@ services:
     environment:
       <<: *airflow-common-env
       DUMB_INIT_SETSID: "0"
-    restart: always
+    restart: no
     depends_on:
       <<: *airflow-common-depends-on
       airflow-apiserver:
@@ -155,7 +155,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    restart: no
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -284,7 +284,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    restart: no
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
