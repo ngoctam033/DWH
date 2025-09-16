@@ -83,7 +83,7 @@ with DAG(
     dag_id='extract_geo_location',
     default_args=default_args,
     #schedule=None,
-    catchup=True,
+    catchup=False,
     tags=['extract', 'geo_location'],
     description='Extract toàn bộ bảng geo_location từ PostgreSQL',
     params={

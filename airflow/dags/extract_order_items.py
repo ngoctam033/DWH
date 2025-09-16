@@ -207,7 +207,7 @@ with DAG(
     dag_id='daily_extract_order_items_lazada',
     default_args=default_args,
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Lazada',
-    # schedule='0 3 * * *',
+    schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     tags=['elt', 'parquet', 'lazada'],
@@ -249,12 +249,12 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Shopee',
     schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['elt', 'parquet', 'shopee'],
     params={
         'channel': 'shopee',
         'layer_inlets': 'cleaned',
-        'layer_in': 'cleaned',
+        'layer_in': 'staging',
         'file_type': 'parquet',
         'data_model': 'orders'
     }
@@ -289,12 +289,12 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiki',
     schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['elt', 'parquet', 'tiki'],
     params={
         'channel': 'tiki',
         'layer_inlets': 'cleaned',
-        'layer_in': 'cleaned',
+        'layer_in': 'staging',
         'file_type': 'parquet',
         'data_model': 'orders'
     }
@@ -329,12 +329,12 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiktok',
     schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['elt', 'parquet', 'tiktok'],
     params={
         'channel': 'tiktok',
         'layer_inlets': 'cleaned',
-        'layer_in': 'cleaned',
+        'layer_in': 'staging',
         'file_type': 'parquet',
         'data_model': 'orders'
     }
@@ -369,12 +369,12 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Website',
     schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['elt', 'parquet', 'website'],
     params={
         'channel': 'website',
         'layer_inlets': 'cleaned',
-        'layer_in': 'cleaned',
+        'layer_in': 'staging',
         'file_type': 'parquet',
         'data_model': 'orders'
     }

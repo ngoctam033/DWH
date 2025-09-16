@@ -128,7 +128,7 @@
 #     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
 #     #schedule='0 4 * * *',
 #     start_date=datetime(2023, 1, 1),
-#     catchup=True,
+#     catchup=False,
 #     tags=['clean', 'duckdb', 'minio', 'shopee'],
 #     params={
 #         'channel': 'shopee',
@@ -159,7 +159,7 @@
 #     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
 #     #schedule='0 4 * * *',
 #     start_date=datetime(2023, 1, 1),
-#     catchup=True,
+#     catchup=False,
 #     tags=['clean', 'duckdb', 'minio', 'lazada'],
 #     params={
 #         'channel': 'lazada',
@@ -190,7 +190,7 @@
 #     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
 #     #schedule='0 4 * * *',
 #     start_date=datetime(2023, 1, 1),
-#     catchup=True,
+#     catchup=False,
 #     tags=['clean', 'duckdb', 'minio', 'tiki'],
 #     params={
 #         'channel': 'tiki',
@@ -221,7 +221,7 @@
 #     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
 #     #schedule='0 4 * * *',
 #     start_date=datetime(2023, 1, 1),
-#     catchup=True,
+#     catchup=False,
 #     tags=['clean', 'duckdb', 'minio', 'tiktok   '],
 #     params={
 #         'channel': 'tiktok',
@@ -252,7 +252,7 @@
 #     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
 #     #schedule='0 4 * * *',
 #     start_date=datetime(2023, 1, 1),
-#     catchup=True,
+#     catchup=False,
 #     tags=['clean', 'duckdb', 'minio', 'website'],
 #     params={
 #         'channel': 'website',

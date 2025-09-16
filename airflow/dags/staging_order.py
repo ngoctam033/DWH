@@ -264,7 +264,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Lazada',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['transform', 'parquet', 'lazada'],
     params={
         'channel': 'lazada',
@@ -318,7 +318,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Shopee',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['transform', 'parquet', 'shopee'],
     params={
         'channel': 'shopee',
@@ -372,7 +372,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiki',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['transform', 'parquet', 'tiki'],
     params={
         'channel': 'tiki',
@@ -428,7 +428,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Website',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['transform', 'parquet', 'website'],
     params={
         'channel': 'website',
@@ -484,7 +484,7 @@ with DAG(
     description='Parse JSON, chuyển sang bảng và lưu dạng Parquet cho dữ liệu Tiktok',
     #schedule='0 3 * * *',
     start_date=datetime(2023, 1, 1),
-    catchup=True,
+    catchup=False,
     tags=['transform', 'parquet', 'tiktok'],
     params={
         'channel': 'tiktok',
