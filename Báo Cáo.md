@@ -98,7 +98,7 @@ Các nguồn dữ liệu được xác định thông qua việc giả lập API
 #### 3.1.2. Phân tích dữ liệu từ các sàn thương mại điện tử
 
 **Phương thức lấy dữ liệu:**
-- Chủ yếu thông qua API. Các API cho phép lấy dữ liệu theo khoảng thời gian nhất định (ví dụ: danh sách đơn hàng, danh sách sản phẩm)
+- Chủ yếu thông qua API. Các API cho phép lấy dữ liệu theo khoảng thời gian nhất định (ví dụ: danh sách đơn hàng, danh sách sản phẩm, ...)
 
 **Định dạng dữ liệu:**
 - Dữ liệu trả về từ các API ở định dạng JSON.
@@ -135,7 +135,7 @@ Dựa trên các yêu cầu phân tích từ doanh nghiệp, các chỉ số kin
 - **Sales Dashboard:** Tổng quan về doanh số, xu hướng doanh thu, lợi nhuận.
 - **Inventory & Logistics Dashboard:** Theo dõi tồn kho và trạng thái đơn hàng vận chuyển.
 
-![Giao diện Sales Dashboard](link-den-hinh-sales-dashboard.jpg)
+![Giao diện Sales Dashboard](./Sale Dashboard.png)
 ![Giao diện Inventory & Logistics Dashboard](link-den-hinh-inventory-dashboard.jpg)
 ### 3.2. Thiết kế kiến trúc hệ thống
 
