@@ -135,7 +135,7 @@ Dựa trên các yêu cầu phân tích từ doanh nghiệp, các chỉ số kin
 - **Sales Dashboard:** Tổng quan về doanh số, xu hướng doanh thu, lợi nhuận.
 - **Inventory & Logistics Dashboard:** Theo dõi tồn kho và trạng thái đơn hàng vận chuyển.
 
-![Giao diện Sales Dashboard](./Sale Dashboard.png)
+![Giao diện Sales Dashboard](./Sale Dashboard.jpeg)
 ![Giao diện Inventory & Logistics Dashboard](link-den-hinh-inventory-dashboard.jpg)
 ### 3.2. Thiết kế kiến trúc hệ thống
 
