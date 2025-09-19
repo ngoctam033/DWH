@@ -104,6 +104,11 @@ def build_parquet_query(path):
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
                 """
+    if "/warehouse/" in path:
+        return f"""
+                    SELECT * 
+                    FROM read_parquet('{path}', union_by_name=True)
+                """
     raise ValueError("Đường dẫn không hợp lệ hoặc không được hỗ trợ")
 
 # Hàm với side effect rõ ràng để đọc dữ liệu
