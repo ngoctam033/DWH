@@ -132,12 +132,12 @@ def extract_order(
                     # 5. Các giá trị outlier và không hợp lệ
                     
                     # 6. Vấn đề về kiểu dữ liệu không nhất quán
-                    elif key == 'order_code':
-                        if i % 10 == 0:  # 10% dữ liệu
-                            # Đôi khi order_code là số, đôi khi là chuỗi
-                            order_dict[key] = int(hash(str(value)) % 100000)
-                        else:
-                            order_dict[key] = value
+                    # elif key == 'order_code':
+                    #     if i % 10 == 0:  # 10% dữ liệu
+                    #         # Đôi khi order_code là số, đôi khi là chuỗi
+                    #         order_dict[key] = int(hash(str(value)) % 100000)
+                    #     else:
+                    #         order_dict[key] = value
                             
                     # Giữ nguyên các trường ID, không làm "bẩn" chúng
                     elif key.endswith('_id') or key == 'id':

@@ -17,6 +17,8 @@ def extract_order_items(
     order_codes: List[str] = Query(..., description="Danh sách mã đơn hàng (order_code)", example=["ORD001", "ORD002"])
 ):
     try:
+        # in ra order_codes nhận được
+        print(f"Received order_codes: {order_codes}")
         # Kết nối đến cơ sở dữ liệu
         engine = get_db_connection()
         
@@ -52,7 +54,9 @@ def extract_order_items(
             
             # Thực thi truy vấn
             result = conn.execute(text(query), {"order_codes": tuple(order_codes)})
-            
+            # in ra số bản ghi lấy được
+            rows = result.fetchall()
+            print(f"Số bản ghi lấy được: {len(rows)}")
             # Chuyển kết quả thành danh sách các từ điển và tạo ra dữ liệu "bẩn"
             order_items = []
             

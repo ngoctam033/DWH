@@ -1,5 +1,4 @@
 from airflow import DAG
-from airflow.dags.elt_product import extract_product, save_product
 from airflow.operators.python import PythonOperator
 from airflow.datasets import Dataset
 from datetime import datetime
