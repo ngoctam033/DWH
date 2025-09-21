@@ -145,7 +145,7 @@ def get_object_name(layer, channel, data_model, logical_date, task_id=None, file
     file_name = f"{date_str}_data.{file_type}"
 
     # Tạo đường dẫn đầy đủ theo cấu trúc thư mục phân vùng
-    object_path = f"{layer}/{channel}/{data_model}/year={year}/month={month}/day={day}/{file_name}"
+    object_path = f"layer={layer}/data_model={data_model}/channel={channel}/year={year}/month={month}/day={day}/{file_name}"
     
     # Log đường dẫn trả về
     logging.info(f"Đường dẫn đối tượng trong MinIO: {object_path}")
