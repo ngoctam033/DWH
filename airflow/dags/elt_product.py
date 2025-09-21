@@ -63,7 +63,7 @@ def save_product(**context):
         bucket_name = params.get('bucket_name', DEFAULT_BUCKET)
         
         # Tạo object name
-        object_name = f"cleaned/erp/product/year={logical_date.year}/month={logical_date.month:02d}/day={logical_date.day:02d}/{logical_date.strftime('%Y-%m-%d')}_data.parquet"
+        object_name = f"layer=cleaned/data_model=product/channel=erp/year={logical_date.year}/month={logical_date.month:02d}/day={logical_date.day:02d}/{logical_date.strftime('%Y-%m-%d')}_data.parquet"
 
         # Upload lên MinIO
         client = get_minio_client()
