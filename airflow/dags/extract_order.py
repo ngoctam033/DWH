@@ -15,11 +15,11 @@ from config.minio_config import (
 from extract_user import fetch_json_from_api, save_raw_json_to_minio
 
 # Định nghĩa các Dataset (asset) cho từng kênh theo cấu trúc mới (có partition)
-SHOPEE_ORDER_DATASET = Dataset("s3://minio/raw/shopee/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-TIKTOK_ORDER_DATASET = Dataset("s3://minio/raw/tiktok/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-LAZADA_ORDER_DATASET = Dataset("s3://minio/raw/lazada/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-TIKI_ORDER_DATASET = Dataset("s3://minio/raw/tiki/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-WEBSITE_ORDER_DATASET = Dataset("s3://minio/raw/website/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
+# SHOPEE_ORDER_DATASET = Dataset("s3://minio/raw/shopee/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
+# TIKTOK_ORDER_DATASET = Dataset("s3://minio/raw/tiktok/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
+# LAZADA_ORDER_DATASET = Dataset("s3://minio/raw/lazada/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
+# TIKI_ORDER_DATASET = Dataset("s3://minio/raw/tiki/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
+# WEBSITE_ORDER_DATASET = Dataset("s3://minio/raw/website/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
 
 # Định nghĩa DAG
 default_args = {
@@ -62,7 +62,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        outlets=[LAZADA_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
+        # #outlets=[LAZADA_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
     )
 
     # Task cuối cùng: Trigger DAG transform_lazada_order_to_parquet
@@ -108,7 +108,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        outlets=[SHOPEE_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
+        # #outlets=[SHOPEE_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
     )
 
     # Task cuối cùng: Trigger DAG transform_shopee_order_to_parquet
@@ -154,7 +154,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        outlets=[TIKI_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
+        # #outlets=[TIKI_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
     )
 
     # Task cuối cùng: Trigger DAG transform_tiki_order_to_parquet
@@ -200,7 +200,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        outlets=[WEBSITE_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
+        # #outlets=[WEBSITE_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
     )
 
     # Task cuối cùng: Trigger DAG transform_website_order_to_parquet
@@ -246,7 +246,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        outlets=[TIKTOK_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiktok
+        # #outlets=[TIKTOK_ORDER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiktok
     )
 
     # Task cuối cùng: Trigger DAG transform_tiktok_order_to_parquet
