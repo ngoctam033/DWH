@@ -31,7 +31,7 @@ def build_s3_path(bucket_name, path):
 # Hàm thuần túy để tạo truy vấn SQL
 def build_parquet_query(path):
     """Tạo câu truy vấn SQL để đọc parquet"""
-    if "/orders/" in path:
+    if "/data_model=orders/" in path:
         return f"""
             SELECT 
                 id, 
@@ -59,12 +59,12 @@ def build_parquet_query(path):
             FROM read_parquet('{path}', union_by_name=True)
             ORDER BY created_at
         """
-    if "/order_channel/" in path:
+    if "/data_model=order_channel/" in path:
         return f"""
                     SELECT DISTINCT id, name, is_active
                     FROM read_parquet('{path}', union_by_name=True)
                 """
-    if "/order_items/" in path:
+    if "/data_model=order_items/" in path:
         return f"""
                     SELECT 
                             *,
@@ -79,32 +79,27 @@ def build_parquet_query(path):
                             END AS cost_price
                     FROM read_parquet('{path}', union_by_name=True)
                 """
-    if "/users/" in path:
+    if "/data_model=users/" in path:
         return f"""
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
                 """
-    if "/product/" in path:
+    if "/data_model=/product/" in path:
         return f"""
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
                 """
-    if "/geo_location/" in path:
+    if "/data_model=geo_location/" in path:
         return f"""
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
                 """
-    if "/payment/" in path:
+    if "/data_model=payment/" in path:
         return f"""
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
                 """
-    if "/sub_category/" in path:
-        return f"""
-                    SELECT * 
-                    FROM read_parquet('{path}', union_by_name=True)
-                """
-    if "/warehouse/" in path:
+    if "/data_model=sub_category/" in path:
         return f"""
                     SELECT * 
                     FROM read_parquet('{path}', union_by_name=True)
@@ -170,43 +165,43 @@ if __name__ == "__main__":
     data_sources = [
         {
             "name": "users",
-            "parquet_in": "staging/*/users/**/*.parquet",
-            "parquet_out_local": "output/cleaned_users.parquet"
+            "parquet_in": "layer=staging/data_model=users/channel=*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/users.parquet"
         },
         {
             "name": "orders",
-            "parquet_in": "staging/*/orders/**/*.parquet",
-            "parquet_out_local": "output/cleaned_orders.parquet"
+            "parquet_in": "layer=staging/data_model=orders/channel=*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/orders.parquet"
         },
         {
             "name": "orderchannels",
-            "parquet_in": "cleaned/*/order_channel/**/*.parquet",
-            "parquet_out_local": "output/cleaned_order_channel.parquet"
+            "parquet_in": "layer=cleaned/data_model=order_channel/channel=*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/order_channel.parquet"
         },
         {
             "name": "orderitems",
-            "parquet_in": "staging/*/order_items/**/*.parquet",
-            "parquet_out_local": "output/cleaned_order_items.parquet"
+            "parquet_in": "layer=staging/data_model=order_items/channel=*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/order_items.parquet"
         },
         {
             "name": "product",
-            "parquet_in": "cleaned/*/product/**/*.parquet",
-            "parquet_out_local": "output/cleaned_product.parquet"
+            "parquet_in": "layer=cleaned/data_model=product/*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/product.parquet"
         },
         {
             "name": "geo_location",
-            "parquet_in": "cleaned/*/geo_location/**/*.parquet",
-            "parquet_out_local": "output/cleaned_geo_location.parquet"
+            "parquet_in": "layer=cleaned/data_model=geo_location/channel=*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/geo_location.parquet"
         },
         {
             "name": "payment",
-            "parquet_in": "cleaned/*/payment/**/*.parquet",
-            "parquet_out_local": "output/cleaned_payment.parquet"
+            "parquet_in": "layer=cleaned/data_model=payment/channel=*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/payment.parquet"
         },
         {
             "name": "sub_category",
-            "parquet_in": "cleaned/*/sub_category/**/*.parquet",
-            "parquet_out_local": "output/cleaned_sub_category.parquet"
+            "parquet_in": "layer=cleaned/data_model=sub_category/channel=*/year=*/month=*/day=*/*.parquet",
+            "parquet_out_local": "output/sub_category.parquet"
         }
     ]
     # Sử dụng phiên bản thông thường
