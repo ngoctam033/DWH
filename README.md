@@ -1,45 +1,51 @@
-# Hệ thống Lakehouse cho Doanh nghiệp Thương mại Điện tử
+# Hệ thống Data Warehouse cho Doanh nghiệp Thương mại Điện tử
 
 ## **Giới thiệu**
-Hệ thống này được thiết kế để giải quyết các vấn đề về dữ liệu phân tán và không đồng nhất của một doanh nghiệp thương mại điện tử chuyên bán các sản phẩm công nghệ như điện thoại, laptop, phụ kiện,... trên các nền tảng như Shopee, Lazada, Tiki và website riêng. Mục tiêu chính là xây dựng một hệ thống hợp nhất dữ liệu, phục vụ phân tích, báo cáo và ra quyết định kinh doanh.
+Hệ thống này được thiết kế để giải quyết các vấn đề về dữ liệu phân tán và không đồng nhất của một doanh nghiệp thương mại điện tử chuyên bán các sản phẩm công nghệ như điện thoại, laptop, phụ kiện,... trên các nền tảng như Shopee, Lazada, Tiki và website riêng. Mục tiêu chính là xây dựng một hệ thống Data Warehouse để hợp nhất dữ liệu, phục vụ phân tích, báo cáo và ra quyết định kinh doanh.
 
 ---
 
 ## **Kiến trúc tổng thể**
 
 ### **1. Tổng quan kiến trúc**
-- **Mô hình phân lớp**: Dữ liệu được tổ chức theo các lớp Raw → Bronze → Silver → Gold.
-- **Tích hợp batch và near real-time**: Hệ thống hỗ trợ thu thập dữ liệu định kỳ và theo sự kiện.
-- **Bảo mật và phân quyền**: Sử dụng cơ chế kiểm soát truy cập dựa trên vai trò (role-based access control) và ghi log hoạt động.
+- **Mô hình ELT (Extract - Load - Transform)**: Hệ thống được xây dựng theo kiến trúc ELT hiện đại.
+- **Mô hình phân lớp**: Dữ liệu được tổ chức theo các lớp `Raw` → `Staging` → `Cleaned`.
+- **Tự động hóa**: Toàn bộ quy trình được tự động hóa bằng Apache Airflow.
 
 ### **2. Các lớp chính**
 - **Data Sources**: Thu thập dữ liệu từ API của các sàn thương mại điện tử, hệ thống ERP, CRM, và các file CSV.
-- **Ingestion Layer**: Sử dụng Apache Airflow để thu thập dữ liệu định kỳ và theo sự kiện.
-- **Storage Layer**: Lưu trữ dữ liệu thô và đã xử lý dưới dạng Parquet trên MinIO.
-- **Processing Layer**: Sử dụng DuckDB để làm sạch, chuẩn hóa và biến đổi dữ liệu.
+- **Ingestion Layer (Extract & Load)**: Sử dụng Apache Airflow để thu thập dữ liệu định kỳ và tải vào kho lưu trữ dưới dạng thô.
+- **Storage Layer**: Lưu trữ dữ liệu trên MinIO theo các tầng, sử dụng định dạng Parquet cho các tầng đã qua xử lý.
+- **Processing Layer (Transform)**: Sử dụng DuckDB để thực hiện các bước làm sạch, chuẩn hóa và biến đổi dữ liệu.
 - **Visualization Layer**: Sử dụng Power BI để tạo báo cáo và dashboard phục vụ phân tích kinh doanh.
 
 ---
 
 ## **Cấu trúc thư mục lưu trữ**
-Dữ liệu được tổ chức trong MinIO theo cấu trúc sau:
+Dữ liệu được tổ chức trong MinIO theo cấu trúc phân vùng để tối ưu hóa truy vấn:
 
 ```
-data/
+datawarehouse/
 ├── raw/
-│   └── orders/
-│       ├── shopee/
-│       │   └── 2025-08-05.csv
-│       ├── lazada/
-│       │   └── 2025-08-05.csv
-│       ├── tiki/
-│       │   └── 2025-08-05.csv
-│       └── website/
-│           └── 2025-08-05.csv
-├── processed/
-│   └── orders/
-│       └── 2025-08-05/
-│           └── orders_cleaned.parquet
+│   └── {channel}/
+│       └── {data_type}/
+│           └── year={YYYY}/
+│               └── month={MM}/
+│                   └── day={DD}/
+│                       └── data.json
+├── staging/
+│   └── {channel}/
+│       └── {data_type}/
+│           └── year={YYYY}/
+│               └── month={MM}/
+│                   └── day={DD}/
+│                       └── data.parquet
+└── cleaned/
+    └── {data_type}/
+        └── year={YYYY}/
+            └── month={MM}/
+                └── day={DD}/
+                    └── data.parquet
 ```
 
 ---
@@ -47,25 +53,25 @@ data/
 ## **Công nghệ sử dụng**
 
 ### **1. Apache Airflow**
-- Quản lý và tự động hóa các pipeline xử lý dữ liệu.
+- Quản lý và tự động hóa các data pipeline theo mô hình ELT.
 - Các DAG được định nghĩa để thu thập, làm sạch và lưu trữ dữ liệu.
 
 ### **2. DuckDB**
-- Công cụ xử lý dữ liệu nhanh chóng, hỗ trợ truy vấn SQL trên các file Parquet.
-- Được sử dụng để làm sạch và chuẩn hóa dữ liệu.
+- Công cụ xử lý dữ liệu nhanh chóng, hỗ trợ truy vấn SQL trực tiếp trên các file Parquet.
+- Được sử dụng để thực hiện bước Transform (làm sạch, chuẩn hóa dữ liệu).
 
 ### **3. MinIO**
-- Lưu trữ dữ liệu thô và đã xử lý dưới dạng file Parquet.
+- Đóng vai trò là kho dữ liệu (Data Warehouse), lưu trữ dữ liệu ở các tầng khác nhau.
 - Hỗ trợ giao thức S3 để tích hợp dễ dàng với các công cụ khác.
 
 ### **4. PostgreSQL**
 - Lưu trữ metadata cho Apache Airflow.
 
 ### **5. Redis**
-- Hỗ trợ hàng đợi tác vụ cho Apache Airflow.
+- Hỗ trợ hàng đợi tác vụ (message broker) cho Celery Executor của Airflow.
 
 ### **6. Power BI**
-- Tạo báo cáo và dashboard trực quan để phân tích dữ liệu.
+- Tạo báo cáo và dashboard trực quan để phân tích dữ liệu từ tầng `cleaned`.
 
 ---
 
@@ -115,7 +121,7 @@ DWH/
 
 ## **Tác giả**
 - **Ngọc Tâm**
-- Email: ngoctam@example.com
+- Email: nguyenngoctam0332003@gmail.com
 - GitHub: [https://github.com/ngoctam033](https://github.com/ngoctam033)
 
 ---
