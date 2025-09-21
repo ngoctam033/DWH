@@ -518,31 +518,6 @@ Việc xây dựng các dashboard trong Power BI được thực hiện theo m�
    
    **Bộ lọc (slicers):** Khoảng thời gian, đối tác vận chuyển, danh mục sản phẩm, khu vực địa lý
 
-#### 3. Customer Analysis Dashboard:
-
-   **Mục tiêu:** Phân tích hành vi khách hàng để cải thiện chiến lược tiếp thị và dịch vụ khách hàng.
-   
-   **Nguồn dữ liệu:**
-   - fact_orders
-   - dim_customers, dim_geo_locations, dim_dates
-   - dim_order_channels
-   
-   **Các chỉ số chính cần tính toán:**
-   - Số khách hàng hoạt động = COUNT(DISTINCT dim_customers[customer_id])
-   - Customer Lifetime Value (CLV) = SUM(fact_orders[profit]) / [Số khách hàng hoạt động]
-   - Tần suất mua hàng = COUNT(fact_orders[order_id]) / [Số khách hàng hoạt động]
-   - Tỷ lệ khách hàng quay lại = COUNT(khách hàng mua > 1 lần) / [Số khách hàng hoạt động]
-   - RFM Score (Recency, Frequency, Monetary) = Kết hợp thời gian mua gần đây, tần suất và giá trị đơn hàng
-   
-   **Các visual chính:**
-   - Scatter chart phân tích RFM với các nhóm khách hàng
-   - Histogram phân bố giá trị đơn hàng trung bình
-   - Line chart theo dõi tỷ lệ khách hàng mới và quay lại theo thời gian
-   - Table hiển thị top khách hàng có giá trị cao nhất
-   - Funnel chart hiển thị tỷ lệ chuyển đổi theo các giai đoạn (xem, thêm vào giỏ hàng, mua)
-   
-   **Bộ lọc (slicers):** Khoảng thời gian, phân khúc khách hàng, kênh bán hàng, khu vực địa lý
-
 ### 4.3.2. Triển khai các dashboard
 
 Power BI được sử dụng để kết nối với các file Parquet đã được tổng hợp và lưu trong thư mục output của DuckDB. Dựa trên kế hoạch đã đề ra, các báo cáo và dashboard được xây dựng bao gồm:
@@ -558,11 +533,6 @@ Power BI được sử dụng để kết nối với các file Parquet đã đ�
    - Thời gian giao hàng trung bình theo đối tác vận chuyển
    - Tỷ lệ giao hàng đúng hạn
    - Cảnh báo hàng tồn kho thấp
-
-#### 3. Customer Analysis Dashboard:
-   - Tần suất mua hàng của khách hàng
-   - Giá trị đơn hàng trung bình theo kênh bán hàng
-   - Phân tích nhóm khách hàng theo mô hình RFM
 
 Mỗi dashboard được thiết kế với các bộ lọc (slicers) cho phép người dùng tương tác và khám phá dữ liệu theo các khía cạnh khác nhau như thời gian, kênh bán hàng, danh mục sản phẩm.
 
@@ -602,7 +572,7 @@ Mã ví dụ cho một endpoint mô phỏng trong FastAPI:
 
 ```python
 @app.get("/api/shopee/orders", tags=["Shopee"])
-async def get_shopee_orders(
+def get_shopee_orders(
     start_date: str = Query(..., description="Start date in YYYY-MM-DD format"),
     end_date: str = Query(..., description="End date in YYYY-MM-DD format")
 ):
@@ -688,28 +658,7 @@ Hệ thống được tổ chức thành nhiều container riêng biệt, mỗi 
 
 #### 4.5.2. Docker Compose
 
-File `docker-compose.yml` định nghĩa cấu hình và mối quan hệ giữa các container:
-
-```yaml
-version: '3'
-services:
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
-    volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 5s
-      retries: 5
-    restart: always
-
-volumes:
-  postgres-db-volume:
-```
+File `docker-compose.yml` được sử dụng để định nghĩa và quản lý toàn bộ các dịch vụ của hệ thống. Nó thiết lập các container, định nghĩa các biến môi trường cần thiết (như thông tin kết nối MinIO, Airflow), và quản lý mạng lưới (networking) để các container có thể giao tiếp với nhau một cách an toàn. Với một lệnh duy nhất (`docker-compose up -d`), toàn bộ hệ thống có thể được khởi chạy.
 
 #### 4.5.3. Dockerfile cho Airflow
 
@@ -741,210 +690,29 @@ Việc containerization với Docker không chỉ giúp đơn giản hóa quá t
 
 ### 4.6. Xử lý lỗi và giám sát hệ thống
 
-Để đảm bảo tính ổn định và hiệu quả của hệ thống Data Warehouse, một chiến lược toàn diện về xử lý lỗi và giám sát đã được triển khai:
+Để đảm bảo tính ổn định của pipeline, hệ thống tận dụng các cơ chế xử lý lỗi và giám sát được tích hợp sẵn trong Apache Airflow.
 
 #### 4.6.1. Cơ chế xử lý lỗi trong Data Pipeline
 
-1. **Chiến lược retry:**
-   - Các task trong Airflow được cấu hình với cơ chế retry tự động
-   - Số lần thử lại và khoảng thời gian giữa các lần thử được tùy chỉnh theo loại task
-   ```python
-   extract_task = PythonOperator(
-       task_id='extract_data_from_api',
-       python_callable=extract_function,
-       retries=3,
-       retry_delay=timedelta(minutes=5),
-       retry_exponential_backoff=True
-   )
-   ```
+1.  **Chiến lược Thử lại (Retry):**
+    *   Mỗi tác vụ (task) trong các DAG đều được cấu hình với cơ chế tự động thử lại khi gặp lỗi. Các tham số như `retries` (số lần thử lại) và `retry_delay` (khoảng thời gian giữa các lần thử) được thiết lập để xử lý các lỗi tạm thời, chẳng hạn như mất kết nối mạng hoặc API bị quá tải.
+    *   Điều này giúp tăng khả năng phục hồi của pipeline mà không cần sự can thiệp thủ công.
 
-2. **Xử lý ngoại lệ:**
-   - Các task được bao bọc trong khối try-except để xử lý các ngoại lệ cụ thể
-   - Lỗi được phân loại và xử lý phù hợp: lỗi tạm thời, lỗi kết nối, lỗi dữ liệu
-   ```python
-   def extract_with_error_handling(api_url, params):
-       try:
-           response = requests.get(api_url, params=params, timeout=30)
-           response.raise_for_status()
-           return response.json()
-       except requests.exceptions.ConnectionError as e:
-           # Xử lý lỗi kết nối
-           log_connection_error(e)
-           raise AirflowException(f"Connection error: {str(e)}")
-       except requests.exceptions.Timeout as e:
-           # Xử lý timeout
-           log_timeout_error(e)
-           raise AirflowException(f"API timeout: {str(e)}")
-       except requests.exceptions.HTTPError as e:
-           # Xử lý lỗi HTTP
-           if response.status_code == 429:  # Rate limiting
-               log_rate_limit_error(e)
-               # Đánh dấu để retry sau
-               raise AirflowTaskDeferred()
-           else:
-               log_http_error(e)
-               raise AirflowException(f"HTTP error: {str(e)}")
-       except Exception as e:
-           # Xử lý các lỗi không mong đợi khác
-           log_unexpected_error(e)
-           raise AirflowException(f"Unexpected error: {str(e)}")
-   ```
+2.  **Xử lý ngoại lệ (Exception Handling):**
+    *   Bên trong mã nguồn của các tác vụ Python, các khối `try...except` được sử dụng để bắt và xử lý các lỗi cụ thể có thể lường trước.
+    *   Khi một lỗi xảy ra, nó sẽ được ghi lại (log) một cách chi tiết, giúp cho việc gỡ lỗi sau này trở nên dễ dàng hơn. Airflow sẽ đánh dấu tác vụ là `failed` và dừng các tác vụ phụ thuộc, ngăn ngừa lỗi lan truyền.
 
-3. **Dead letter queue:**
-   - Dữ liệu không thể xử lý được chuyển vào "dead letter queue" để phân tích và xử lý sau
-   - Metadata về lỗi được lưu lại để hỗ trợ việc debug
+#### 4.6.2. Giám sát hệ thống
 
-#### 4.6.2. Hệ thống giám sát
+Việc giám sát chủ yếu được thực hiện thông qua giao diện người dùng web của Airflow, cung cấp một cái nhìn tổng quan và chi tiết về sức khỏe của toàn bộ hệ thống:
 
-1. **Giám sát quy trình:**
-   - Sử dụng giao diện web Airflow để theo dõi trạng thái các DAG và task
-   - Cấu hình cảnh báo khi DAG thất bại hoặc chạy quá thời gian dự kiến
-   - Tích hợp với Slack để thông báo kịp thời các vấn đề quan trọng
+*   **Theo dõi trạng thái DAG và Task:** Giao diện Airflow cho phép theo dõi trạng thái (running, success, failed, skipped) của từng DAG và từng tác vụ trong đó một cách trực quan.
+*   **Xem lại lịch sử:** Cung cấp lịch sử chi tiết về các lần chạy của DAG, thời gian bắt đầu, thời gian kết thúc và thời gian thực thi.
+*   **Truy cập Logs:** Đối với mỗi lần chạy tác vụ, người dùng có thể truy cập trực tiếp vào file log chi tiết để kiểm tra kết quả đầu ra hoặc điều tra nguyên nhân gây lỗi.
 
-2. **Giám sát tài nguyên:**
-   - Sử dụng Prometheus để thu thập metrics về CPU, bộ nhớ, disk I/O của các container
-   - Grafana dashboards hiển thị trực quan các metrics này
-   - Cấu hình cảnh báo khi tài nguyên sử dụng vượt ngưỡng
+Cách tiếp cận này giúp đơn giản hóa việc quản lý và bảo trì hệ thống, tập trung vào các công cụ có sẵn mà không cần triển khai thêm các hệ thống giám sát phức tạp từ bên ngoài.
 
-3. **Giám sát luồng dữ liệu:**
-   - Theo dõi số lượng bản ghi qua mỗi giai đoạn của pipeline
-   - Phát hiện bất thường về khối lượng dữ liệu (quá ít hoặc quá nhiều so với dự kiến)
-   - Kiểm tra tính toàn vẹn của dữ liệu sau mỗi bước xử lý
-
-4. **Logging tập trung:**
-   - Tất cả logs từ các thành phần được tập hợp vào một hệ thống logging trung tâm
-   - Sử dụng ELK stack (Elasticsearch, Logstash, Kibana) để lưu trữ, tìm kiếm và phân tích logs
-   - Cấu hình báo động dựa trên các mẫu log cụ thể
-
-Dashboard giám sát luồng dữ liệu đã được xây dựng để theo dõi:
-- Tổng số bản ghi được xử lý qua mỗi giai đoạn
-- Thời gian hoàn thành của mỗi DAG
-- Tỷ lệ lỗi theo loại
-- Khối lượng dữ liệu theo nguồn và thời gian
-
-Hệ thống xử lý lỗi và giám sát này giúp đảm bảo tính tin cậy của quy trình, cho phép phát hiện và xử lý sự cố kịp thời, đồng thời cung cấp thông tin quý giá để tối ưu hóa hiệu suất hệ thống liên tục.
-
-## 5. Đánh giá và kết quả
-### 5.1. Kết quả đạt được
-
-Hệ thống Data Warehouse hoàn chỉnh đã được xây dựng và triển khai thành công với các kết quả chính sau:
-
-1. **Tự động hóa quy trình ELT:**
-   - Đã xây dựng 15+ DAGs trong Airflow để tự động hóa toàn bộ quy trình từ trích xuất dữ liệu (extract) đến tải lên kho lưu trữ (load) và biến đổi dữ liệu (transform).
-   - Mỗi DAG được thiết kế để xử lý một nguồn dữ liệu cụ thể (Shopee, Lazada, Tiki, Tiktok, Website) và một loại dữ liệu (đơn hàng, chi tiết đơn hàng, người dùng, v.v.).
-   - Các DAG được lập lịch chạy hàng ngày và tự động kích hoạt các DAG phụ thuộc khi hoàn thành.
-
-2. **Kiến trúc lưu trữ đa lớp:**
-   - Dữ liệu được lưu trữ trong MinIO với cấu trúc thư mục phân cấp rõ ràng (raw, staging, cleaned).
-   - Mỗi lớp lưu trữ phản ánh một giai đoạn xử lý dữ liệu, từ dữ liệu thô đến dữ liệu đã được làm sạch và chuẩn hóa.
-   - Định dạng Parquet được chọn lựa phù hợp cho việc lưu trữ và truy vấn hiệu quả.
-
-3. **Ứng dụng công nghệ xử lý dữ liệu tiên tiến:** Việc sử dụng DuckDB để truy vấn và xử lý dữ liệu trực tiếp từ MinIO đã tận dụng được ưu điểm của cả hai công nghệ, mang lại hiệu suất cao và chi phí thấp. Khả năng thực hiện các phép biến đổi phức tạp thông qua SQL đơn giản hóa quy trình phát triển và bảo trì hệ thống.
-
-4. **Trực quan hóa dữ liệu hiệu quả:** Các dashboard trong Power BI được thiết kế để cung cấp cái nhìn tổng quan và chi tiết về hoạt động kinh doanh, giúp các nhà quản lý đưa ra quyết định dựa trên dữ liệu một cách kịp thời và chính xác.
-
-Giá trị của hệ thống đối với doanh nghiệp là rất lớn, từ việc tiết kiệm thời gian và nguồn lực trong việc thu thập và xử lý dữ liệu, đến khả năng cung cấp thông tin kinh doanh quan trọng một cách nhanh chóng và chính xác. Điều này giúp doanh nghiệp có thể phản ứng nhanh với các thay đổi thị trường, tối ưu hóa chiến lược kinh doanh và nâng cao lợi thế cạnh tranh.
-
-### 5.2. Đánh giá hiệu quả hệ thống
-
-1. **Khả năng tự động hóa:**
-   - Giảm 90% thời gian thủ công so với quy trình trước đây, từ việc trích xuất dữ liệu đến tạo báo cáo.
-   - Hệ thống tự động chạy các DAG theo lịch định sẵn, không cần sự can thiệp của người dùng.
-   - Các lỗi được ghi nhận và thông báo qua Airflow, giúp phát hiện và xử lý sự cố kịp thời.
-
-2. **Tính chính xác và nhất quán:**
-   - Loại bỏ sai sót do xử lý thủ công và đảm bảo tính nhất quán của dữ liệu.
-   - Các quy trình làm sạch dữ liệu được chuẩn hóa và tự động hóa, giảm thiểu lỗi do con người.
-   - Khả năng theo dõi nguồn gốc dữ liệu (data lineage) giúp kiểm soát chất lượng dữ liệu tốt hơn.
-
-3. **Khả năng mở rộng:**
-   - Kiến trúc module cho phép dễ dàng thêm nguồn dữ liệu mới hoặc loại dữ liệu mới.
-   - Môi trường containerized (Docker) giúp dễ dàng mở rộng tài nguyên khi cần thiết.
-   - MinIO và DuckDB có khả năng xử lý khối lượng dữ liệu lớn hiệu quả.
-
-4. **Lợi ích kinh tế:**
-   - Tiết kiệm chi phí nhân lực cho việc thu thập và xử lý dữ liệu thủ công.
-   - Cải thiện hiệu quả kinh doanh nhờ khả năng ra quyết định dựa trên dữ liệu thời gian thực.
-   - Giảm chi phí lưu trữ và xử lý dữ liệu nhờ định dạng Parquet hiệu quả và công nghệ mã nguồn mở.
-
-### 5.3. Hạn chế của hệ thống
-
-1. **Hạn chế về tích hợp:**
-   - Hệ thống hiện tại sử dụng API giả lập, cần được điều chỉnh khi tích hợp với API thật của các sàn TMĐT.
-   - Chưa có cơ chế xử lý các thay đổi trong cấu trúc API của các sàn TMĐT một cách tự động.
-
-2. **Hạn chế về xử lý dữ liệu:**
-   - Chưa triển khai đầy đủ cơ chế xử lý dữ liệu incrementally, hiện tại đang load toàn bộ dữ liệu hàng ngày.
-   - Thiếu cơ chế kiểm tra chất lượng dữ liệu (data quality checks) tự động trong pipeline.
-   - Chưa có giải pháp tối ưu cho việc xử lý dữ liệu lịch sử (archival data).
-
-3. **Hạn chế về phân tích:**
-   - Các mô hình phân tích nâng cao (như dự báo, phân tích xu hướng) chưa được triển khai.
-   - Chưa có khả năng tự động phát hiện bất thường (anomaly detection) trong dữ liệu kinh doanh.
-   - Khả năng truy vấn ad-hoc còn hạn chế, người dùng phụ thuộc vào các dashboard có sẵn.
-
-4. **Vấn đề về hiệu suất:**
-   - Khi lượng dữ liệu tăng lên đáng kể, cần có giải pháp tối ưu hóa truy vấn và lưu trữ.
-   - Thiếu cơ chế cache thông minh cho các truy vấn phổ biến.
-   - Chưa có chiến lược rõ ràng cho việc lưu trữ dữ liệu lâu dài (archiving strategy).
-### 5.4. Bảo mật và kiểm soát truy cập
-
-Hệ thống Data Warehouse được thiết kế với quan tâm đặc biệt đến bảo mật và kiểm soát truy cập dữ liệu, bao gồm các cơ chế sau:
-
-#### 5.4.1. Kiểm soát truy cập
-
-1. **Hệ thống phân quyền chi tiết:**
-   - Áp dụng mô hình Role-Based Access Control (RBAC) cho tất cả các thành phần
-   - Các vai trò được định nghĩa: Admin, DataEngineer, DataAnalyst, Viewer
-   - Phân quyền chi tiết đến từng nguồn dữ liệu và thao tác
-
-2. **Kiểm soát truy cập MinIO:**
-   - Cấu hình IAM (Identity and Access Management) cho MinIO
-   - Sử dụng chính sách truy cập để giới hạn người dùng chỉ được truy cập vào các bucket cụ thể
-   - Tạo các credentials tạm thời với thời gian sống hạn chế cho các tiến trình tự động
-
-3. **Kiểm soát truy cập Airflow:**
-   - Tích hợp xác thực LDAP hoặc OAuth2 để quản lý người dùng tập trung
-   - Phân quyền chi tiết đến từng DAG và task
-   - Sử dụng các biến môi trường riêng tư cho thông tin nhạy cảm
-
-4. **Kiểm soát truy cập dashboard:**
-   - Tích hợp xác thực SSO (Single Sign-On) với hệ thống identity provider của doanh nghiệp
-   - Row-level security trong Power BI để lọc dữ liệu dựa trên vai trò người dùng
-   - Theo dõi lịch sử truy cập báo cáo
-
-#### 5.4.2. Bảo mật dữ liệu
-
-1. **Mã hóa dữ liệu:**
-   - Mã hóa dữ liệu trong quá trình truyền (TLS/SSL)
-   - Mã hóa dữ liệu lưu trữ (encryption at rest) trong MinIO
-   - Mã hóa thông tin nhạy cảm trong cơ sở dữ liệu (như thông tin khách hàng)
-
-2. **Xử lý dữ liệu nhạy cảm:**
-   - Áp dụng kỹ thuật che dấu thông tin (data masking) cho các trường nhạy cảm
-   - Triển khai kỹ thuật giả định danh (pseudonymization) cho thông tin nhận dạng cá nhân
-   - Lưu trữ tối thiểu: chỉ lưu trữ dữ liệu cần thiết cho phân tích
-
-3. **Kiểm toán và giám sát bảo mật:**
-   - Ghi lại tất cả các hoạt động truy cập dữ liệu vào audit logs
-   - Giám sát thường xuyên các mẫu truy cập bất thường
-   - Cảnh báo tự động khi phát hiện hành vi đáng ngờ
-
-#### 5.4.3. Tuân thủ quy định
-
-1. **Tuân thủ GDPR (nếu áp dụng):**
-   - Quy trình để đáp ứng các yêu cầu truy cập và xóa dữ liệu của người dùng
-   - Tài liệu hóa luồng dữ liệu để minh bạch việc xử lý thông tin cá nhân
-   - Đánh giá tác động bảo vệ dữ liệu (DPIA) khi triển khai các tính năng mới
-
-2. **Các chính sách bảo mật nội bộ:**
-   - Tài liệu hóa các quy trình xử lý dữ liệu
-   - Quy trình kiểm tra bảo mật định kỳ
-   - Kế hoạch ứng phó sự cố bảo mật
-
-Các biện pháp bảo mật và kiểm soát truy cập này không chỉ bảo vệ dữ liệu nhạy cảm mà còn đảm bảo tính toàn vẹn của hệ thống Data Warehouse, xây dựng niềm tin với các bên liên quan và tuân thủ các quy định hiện hành.
-
-## 6. Kết luận và hướng phát triển
+## KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
 ### 6.1. Kết luận
 
 Luận văn đã thành công trong việc thiết kế và triển khai một hệ thống Data Warehouse hoàn chỉnh cho doanh nghiệp thương mại điện tử đa nền tảng, với những đóng góp và kết quả đáng chú ý sau:
