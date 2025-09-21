@@ -61,7 +61,7 @@ def extract_order_items(
             order_items = []
             
             # Tạo dữ liệu bẩn cho các record
-            for i, row in enumerate(result):
+            for i, row in enumerate(rows):
                 item_dict = {}
                 # Xử lý các kiểu dữ liệu và tạo lỗi có chủ đích
                 for key, value in dict(row._mapping).items():
@@ -114,7 +114,8 @@ def extract_order_items(
                     item_dict['extra_field'] = f"Thông tin không cần thiết {i}"
                 if i % 7 == 0:
                     item_dict['_metadata'] = {"source": "system", "timestamp": datetime.now().isoformat()}
-                
+                # in ra item_dict để kiểm tra
+                print(f"Generated item_dict: {item_dict}")
                 order_items.append(item_dict)
             
             # 6. Thêm một số bản ghi trùng lặp
