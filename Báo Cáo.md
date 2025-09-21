@@ -15,21 +15,39 @@
 ## LỜI MỞ ĐẦU
 
 ### 1.1. Bối cảnh và lý do chọn đề tài
-Sự phát triển vượt bậc của thương mại điện tử đã biến đổi sâu sắc cách thức các doanh nghiệp vận hành. Đối với các doanh nghiệp vừa và nhỏ kinh doanh sản phẩm công nghệ, việc này mang lại cơ hội lớn nhưng cũng đi kèm với nhiều thách thức. Dữ liệu bán hàng từ các sàn thương mại điện tử lớn như Shopee, Lazada, Tiki, cùng với các kênh bán hàng trực tuyến khác, tạo ra một dòng chảy dữ liệu khổng lồ và liên tục. Tuy nhiên, dữ liệu này thường nằm rải rác, không được tổ chức đồng nhất và thiếu một nền tảng chung để tổng hợp. Các doanh nghiệp này thường phải đối mặt với tình trạng dữ liệu bán hàng chưa được cập nhật theo thời gian thực, dẫn đến việc ra quyết định bị chậm trễ và thiếu chính xác.
+Sự phát triển vượt bậc của thương mại điện tử đã biến đổi sâu sắc cách thức các doanh nghiệp vận hành. Đối với các doanh nghiệp vừa và nhỏ kinh doanh sản phẩm công nghệ, việc này mang lại cơ hội lớn nhưng cũng đi kèm với nhiều thách thức. Dữ liệu bán hàng từ các sàn thương mại điện tử lớn như Shopee, Lazada, Tiki, cùng với các kênh bán hàng trực tuyến khác, tạo ra một dòng chảy dữ liệu khổng lồ và liên tục. Tuy nhiên, dữ liệu này thường nằm rải rác, không được tổ chức đồng nhất và thiếu một nền tảng chung để tổng hợp. Các doanh nghiệp này thường phải đối mặt với tình trạng dữ liệu bán hàng không được tổng hợp và cập nhật một cách tự động, dẫn đến việc ra quyết định bị chậm trễ và thiếu chính xác.
 Thực trạng này đặt ra một thách thức lớn: làm thế nào để tích hợp, xử lý và phân tích khối lượng dữ liệu đa dạng này một cách hiệu quả để hỗ trợ ra quyết định kinh doanh chiến lược? Việc xử lý dữ liệu thủ công không chỉ tốn kém về thời gian và nhân lực mà còn tiềm ẩn nhiều rủi ro về sai sót, ảnh hưởng trực tiếp đến khả năng kiểm soát tồn kho, tối ưu hóa chuỗi cung ứng và đánh giá hiệu quả kinh doanh tổng thể.
 Để giải quyết triệt để vấn đề này, việc xây dựng một kiến trúc Data Warehouse hiện đại trở thành một giải pháp tối ưu. Kiến trúc này cho phép hợp nhất dữ liệu từ nhiều nguồn khác nhau vào một kho dữ liệu tập trung, đảm bảo tính toàn vẹn, nhất quán và khả năng mở rộng. Từ đó, doanh nghiệp có thể thực hiện các phân tích chuyên sâu, tạo ra các báo cáo và dashboard trực quan một cách dễ dàng, giúp đội ngũ quản lý có cái nhìn toàn diện và sâu sắc về hiệu suất kinh doanh, từ đó đưa ra các quyết định chiến lược kịp thời.
 Với mong muốn đóng góp một giải pháp thực tiễn, có khả năng ứng dụng cao cho các doanh nghiệp thương mại điện tử, em quyết định thực hiện đề tài luận văn: "Xây dựng hệ thống xử lý và trực quan hóa dữ liệu bán hàng cho doanh nghiệp thương mại điện tử dựa trên kiến trúc Data Warehouse".
 
 ### 1.2. Mục tiêu nghiên cứu
-Mục tiêu chính của luận văn là thiết kế và triển khai một hệ thống Data Warehouse hoàn chỉnh, tự động hóa toàn bộ quy trình từ thu thập, xử lý, lưu trữ đến trực quan hóa dữ liệu bán hàng. Các mục tiêu cụ thể bao gồm:
+Mục tiêu trọng tâm của luận văn là xây dựng một nền tảng dữ liệu (Data Platform) hoàn chỉnh và tự động, có khả năng mở rộng, nhằm giải quyết bài toán tích hợp và phân tích dữ liệu bán hàng từ nhiều nguồn khác nhau. Hệ thống này sẽ là nền tảng vững chắc giúp doanh nghiệp chuyển đổi từ việc xử lý dữ liệu thủ công, rời rạc sang một quy trình tự động, tập trung và dựa trên dữ liệu.
 
-- **Phân tích và thiết kế:** Phân tích chi tiết yêu cầu của doanh nghiệp, từ đó thiết kế một kiến trúc Data Warehouse với quy trình ELT (Extract, Load, Transform) phù hợp cho dữ liệu từ các kênh thương mại điện tử như Shopee, Lazada, Tiki, Tiktok Shop và website riêng.
+Các mục tiêu cụ thể để đạt được điều này bao gồm:
 
-- **Áp dụng công nghệ hiện đại:** Nghiên cứu và ứng dụng các công nghệ mã nguồn mở tiên tiến bao gồm Python cho việc xây dựng các API giả lập dữ liệu nguồn, Apache Airflow để tự động hóa và điều phối các quy trình ETL, MinIO làm kho lưu trữ đối tượng cho dữ liệu ở các giai đoạn khác nhau, DuckDB làm công cụ xử lý dữ liệu phân tích hiệu quả, và Power BI để trực quan hóa.
+- **Phân tích và Thiết kế Kiến trúc Hệ thống:**
+  - Phân tích sâu các yêu cầu nghiệp vụ và đặc điểm dữ liệu từ các nguồn đa dạng, bao gồm API của các sàn thương mại điện tử (Shopee, Lazada, Tiki, Tiktok Shop) và cơ sở dữ liệu nội bộ (hệ thống ERP).
+  - Thiết kế một kiến trúc Data Warehouse hiện đại theo mô hình ELT (Extract, Load, Transform), xác định rõ các tầng dữ liệu (Raw, Staging, Cleaned) để đảm bảo dữ liệu được xử lý một cách có hệ thống.
+  - Thiết kế mô hình dữ liệu Dimensional Modeling (mô hình hóa chiều) với các bảng Fact và Dimension, tạo ra một cấu trúc tối ưu cho việc truy vấn và phân tích báo cáo.
+  - Xây dựng chiến lược lưu trữ dữ liệu hiệu quả trên MinIO, áp dụng kỹ thuật phân vùng (partitioning) theo thời gian và kênh bán hàng để tối ưu hóa hiệu suất truy vấn.
 
-- **Triển khai thực tế:** Xây dựng hệ thống hoàn chỉnh với các DAG Airflow tự động trích xuất dữ liệu từ API các sàn TMĐT, chuyển đổi từ JSON sang Parquet, làm sạch và chuẩn hóa dữ liệu, tính toán các chỉ số kinh doanh cơ bản.
+- **Nghiên cứu và Ứng dụng Công nghệ Hiện đại:**
+  - Sử dụng Python và FastAPI để xây dựng các API giả lập, tạo ra nguồn dữ liệu có thể kiểm soát được, phục vụ cho quá trình phát triển và kiểm thử hệ thống.
+  - Khai thác sức mạnh của Apache Airflow để xây dựng các quy trình dữ liệu (data pipelines) tự động, có khả năng lập lịch, giám sát, và xử lý lỗi một cách linh hoạt.
+  - Tận dụng MinIO làm nền tảng lưu trữ chính cho Data Warehouse, sử dụng định dạng Parquet để tối ưu hóa không gian và tốc độ truy cập.
+  - Ứng dụng DuckDB như một engine xử lý dữ liệu hiệu suất cao, cho phép thực hiện các phép biến đổi (transform) phức tạp trực tiếp trên các file Parquet mà không cần đến một hệ quản trị cơ sở dữ liệu riêng biệt.
+  - Sử dụng Power BI để kết nối vào kho dữ liệu đã được làm sạch, xây dựng các mô hình dữ liệu và tạo ra các dashboard trực quan, tương tác.
 
-- **Đánh giá và đề xuất:** Đánh giá hiệu quả của hệ thống đã xây dựng và đề xuất các hướng phát triển, cải tiến trong tương lai.
+- **Triển khai và Xây dựng Hệ thống Thực tế:**
+  - Xây dựng một bộ các DAG (Directed Acyclic Graph) trong Airflow để tự động hóa toàn bộ chu trình ELT: từ việc trích xuất dữ liệu định kỳ, chuyển đổi định dạng, làm sạch và chuẩn hóa dữ liệu.
+  - Triển khai các logic kiểm tra và đảm bảo chất lượng dữ liệu (data quality) trong giai đoạn Transform để loại bỏ các sai sót và sự không nhất quán.
+  - Xây dựng các bảng dữ liệu tổng hợp (data mart) sẵn sàng cho việc phân tích, tích hợp dữ liệu từ tất cả các kênh bán hàng.
+  - Phát triển các dashboard trong Power BI để trực quan hóa các chỉ số kinh doanh (KPI) quan trọng, giúp ban lãnh đạo có cái nhìn tổng quan và chi tiết về hoạt động kinh doanh.
+
+- **Đánh giá và Đề xuất Hướng phát triển:**
+  - Đánh giá hiệu suất của hệ thống đã xây dựng, bao gồm thời gian thực thi của các pipeline và khả năng đáp ứng của các dashboard.
+  - Kiểm tra tính chính xác và nhất quán của dữ liệu sau khi đã được xử lý và tích hợp.
+  - Đề xuất các hướng cải tiến và phát triển trong tương lai, chẳng hạn như tích hợp thêm các nguồn dữ liệu mới, áp dụng các mô hình phân tích nâng cao (dự báo doanh thu, phân khúc khách hàng), và tối ưu hóa hạ tầng để đáp ứng khối lượng dữ liệu lớn hơn.
 ### 1.3. Đối tượng và phạm vi nghiên cứu
 
 Đối tượng nghiên cứu của luận văn là các mô hình, kiến trúc và công nghệ được sử dụng để xây dựng hệ thống Data Warehouse. Luận văn cũng tập trung vào việc xử lý và phân tích dữ liệu bán hàng từ các nguồn đa dạng của doanh nghiệp thương mại điện tử vừa và nhỏ.
@@ -37,7 +55,7 @@ Luận văn sẽ tập trung vào việc thiết kế và triển khai một h�
 
 ### 1.4. Phương pháp nghiên cứu
 
-- **Nghiên cứu tài liệu:** Tổng hợp và phân tích các lý thuyết liên quan đến Data Warehouse, kiến trúc Data Lake, quy trình ELT và các công nghệ xử lý dữ liệu.
+- **Nghiên cứu tài liệu:** Tổng hợp và phân tích các lý thuyết liên quan đến Data Warehouse, kiến trúc lưu trữ dữ liệu hiện đại, quy trình ELT và các công nghệ xử lý dữ liệu.
 
 - **Phân tích và thiết kế hệ thống:** Áp dụng phương pháp phân tích hệ thống để xác định yêu cầu, từ đó thiết kế kiến trúc và mô hình dữ liệu (Dimensional Modeling) phù hợp cho Data Warehouse.
 
@@ -66,8 +84,6 @@ Trong bối cảnh cạnh tranh gay gắt của thị trường thương mại �
 - **Hiểu rõ hành vi khách hàng:** Phân tích dữ liệu giúp xác định các xu hướng mua sắm, sản phẩm được ưa chuộng, và hành vi của từng phân khúc khách hàng.
 
 - **Đánh giá hiệu suất bán hàng:** Doanh nghiệp có thể theo dõi các chỉ số KPI quan trọng như doanh thu theo ngày, tuần, tháng, và giá trị đơn hàng trung bình.
-
-- **Tối ưu hóa chiến lược marketing và khuyến mãi:** Phân tích dữ liệu cung cấp cái nhìn sâu sắc về hiệu quả của các chiến dịch marketing và khuyến mãi, từ đó giúp doanh nghiệp phân bổ ngân sách hiệu quả hơn.
 
 - **Quản lý tồn kho hiệu quả:** Dựa vào dữ liệu bán hàng, doanh nghiệp có thể dự đoán nhu cầu, từ đó tối ưu hóa lượng hàng tồn kho, tránh tình trạng thiếu hàng hoặc tồn đọng.
 
@@ -105,19 +121,19 @@ Các nguồn dữ liệu được xác định thông qua việc giả lập API
 
 **Các loại dữ liệu chính:**
 - Dữ liệu đơn hàng, dữ liệu sản phẩm, thông tin vận chuyển, thông tin khách hàng, và các chỉ số liên quan khác.
-#### 3.1.3. Phân tích dữ liệu từ các hệ thống nội bộ
+#### 3.1.3. Phân tích dữ liệu từ hệ thống ERP nội bộ
 
 **Phương thức lấy dữ liệu:**
-- Sử dụng các API do hệ thống nội bộ (website, ERP, CRM) cung cấp.
+- Kết nối trực tiếp vào cơ sở dữ liệu PostgreSQL của hệ thống ERP nội bộ để truy vấn và trích xuất dữ liệu.
 
 **Định dạng dữ liệu:**
-- Các API này trả về dữ liệu dưới dạng file CSV.
+- Dữ liệu được lấy trực tiếp từ các bảng trong cơ sở dữ liệu PostgreSQL.
 
 **Các loại dữ liệu chính:**
-- Dữ liệu khách hàng, thông tin tồn kho, chi tiết sản phẩm, và các chương trình khuyến mãi.
+- Thông tin tồn kho, chi tiết sản phẩm, và các chương trình khuyến mãi từ hệ thống ERP.
 
 **Mô phỏng dữ liệu:**
-- Để phục vụ cho việc phát triển và kiểm thử hệ thống, FastAPI sẽ được sử dụng để xây dựng các API giả lập, mô phỏng hoạt động của các hệ thống nội bộ này. Các API giả lập sẽ cung cấp dữ liệu bán hàng có kiểm soát.
+- Để phục vụ cho việc phát triển và kiểm thử, một cơ sở dữ liệu PostgreSQL được thiết lập với dữ liệu mẫu, mô phỏng hoạt động của hệ thống ERP này.
 #### 3.1.4. Xác định các chỉ số kinh doanh (KPI) và dashboard
 
 Dựa trên các yêu cầu phân tích từ doanh nghiệp, các chỉ số kinh doanh (KPI) và dashboard cần xây dựng bao gồm:
@@ -127,7 +143,6 @@ Dựa trên các yêu cầu phân tích từ doanh nghiệp, các chỉ số kin
 - Doanh thu theo ngày/tháng/năm
 - Doanh thu theo từng kênh bán hàng
 - Doanh thu theo sản phẩm/danh mục sản phẩm
-- Hiệu quả khuyến mãi
 - Tình trạng tồn kho
 - Lợi nhuận
 
@@ -162,7 +177,7 @@ Kiến trúc hệ thống được xây dựng với mục tiêu tự động h�
   - `staging/{channel}/{data_type}/year={year}/month={month}/day={day}/`: Chứa dữ liệu đã được chuyển đổi sang Parquet nhưng chưa được làm sạch.
   - `cleaned/{channel}/{data_type}/year={year}/month={month}/day={day}/`: Chứa dữ liệu đã được làm sạch và chuẩn hóa, sẵn sàng cho phân tích.
 
-- **DuckDB:** Được sử dụng để truy vấn và xử lý dữ liệu trực tiếp từ MinIO thông qua extension httpfs, cho phép thực hiện các phép biến đổi phức tạp và hiệu quả trên dữ liệu Parquet mà không cần tải xuống toàn bộ file. Các tác vụ như chuẩn hóa dữ liệu, tính toán các trường phái sinh như cost_price, và kết hợp dữ liệu từ nhiều nguồn được thực hiện thông qua các truy vấn SQL.
+- **DuckDB:** Được sử dụng để truy vấn và xử lý dữ liệu trực tiếp từ MinIO thông qua extension httpfs, cho phép thực hiện các phép biến đổi phức tạp và hiệu quả trên dữ liệu Parquet mà không cần tải xuống toàn bộ dữ liệu. Các tác vụ như chuẩn hóa dữ liệu, tính toán các trường phái sinh như cost_price, và kết hợp dữ liệu từ nhiều nguồn được thực hiện thông qua các truy vấn SQL.
 
 **Thành phần trực quan hóa dữ liệu:**
 - **Power BI:** Kết nối với các file Parquet đã được xử lý và lưu trong thư mục output của DuckDB để xây dựng các báo cáo và dashboard trực quan. Các dashboard bao gồm phân tích doanh thu theo kênh, theo thời gian, và theo danh mục sản phẩm.
@@ -216,44 +231,85 @@ Dựa trên phân tích yêu cầu và mô hình dữ liệu từ các nguồn t
 
 #### 3.3.2. Chiến lược lưu trữ dữ liệu
 
-**Định dạng file:**
-- Dữ liệu trong hệ thống được lưu trữ dưới định dạng **Parquet** - một định dạng cột (columnar) có khả năng nén cao và hiệu quả cho các truy vấn phân tích.
-- Format Parquet cho phép đọc chỉ các cột cần thiết, giảm đáng kể lượng dữ liệu cần đọc vào bộ nhớ khi thực hiện các truy vấn.
+Chiến lược lưu trữ dữ liệu là một trong những nền tảng quan trọng nhất của hệ thống Data Warehouse, ảnh hưởng trực tiếp đến hiệu suất truy vấn, chi phí lưu trữ và khả năng quản lý. Trong dự án này, một chiến lược đa lớp được thiết kế cẩn thận, kết hợp giữa định dạng file tối ưu và kỹ thuật phân vùng thông minh.
 
-**Phân vùng (Partitioning):**
-- Dữ liệu được phân vùng theo hai tiêu chí chính:
-  1. **Theo thời gian:** Sử dụng cấu trúc thư mục `year={year}/month={month}/day={day}` để tổ chức dữ liệu theo ngày, tháng, năm.
-  2. **Theo kênh bán hàng:** Mỗi kênh (shopee, lazada, tiki, tiktok, website) được lưu trong thư mục riêng biệt.
+**1. Lựa chọn Định dạng File: Parquet**
 
-- Chiến lược phân vùng này giúp:
-  - Tối ưu hóa hiệu suất truy vấn cho các báo cáo theo khoảng thời gian cụ thể.
-  - Dễ dàng triển khai các chính sách lưu trữ và lưu trữ lâu dài (archiving) khác nhau cho dữ liệu cũ.
-  - Hạn chế số lượng dữ liệu cần quét khi thực hiện các truy vấn được lọc theo thời gian hoặc kênh bán hàng.
+Thay vì sử dụng các định dạng truyền thống như CSV hay JSON, dự án đã lựa chọn **Parquet** làm định dạng lưu trữ chính cho dữ liệu ở các tầng Staging và Cleaned. Đây là một quyết định có chủ đích dựa trên các ưu điểm vượt trội của Parquet trong các hệ thống phân tích dữ liệu lớn:
 
-**Cấu trúc lưu trữ trong MinIO:**
-- `raw/{channel}/{data_type}/year={year}/month={month}/day={day}/`: Lưu dữ liệu JSON thô được trích xuất từ API.
-- `staging/{channel}/{data_type}/year={year}/month={month}/day={day}/`: Lưu dữ liệu đã được chuyển đổi sang Parquet.
-- `cleaned/{channel}/{data_type}/year={year}/month={month}/day={day}/`: Lưu dữ liệu đã được làm sạch và chuẩn hóa.
+- **Lưu trữ theo cột (Columnar Storage):** Đây là đặc tính quan trọng nhất. Không giống như CSV (lưu theo hàng), Parquet tổ chức dữ liệu theo từng cột. Khi thực hiện một truy vấn phân tích (ví dụ: `tính tổng doanh thu`), hệ thống chỉ cần đọc cột `doanh_thu` thay vì phải quét toàn bộ file. Điều này giúp **giảm thiểu đáng kể I/O** và tăng tốc độ truy vấn lên nhiều lần.
+- **Nén dữ liệu hiệu quả:** Parquet hỗ trợ nhiều thuật toán nén (như Snappy, Gzip, Brotli) và áp dụng chúng trên từng cột. Vì dữ liệu trong cùng một cột thường có tính tương đồng cao, tỷ lệ nén đạt được rất tốt, giúp **tiết kiệm từ 60-80% không gian lưu trữ** so với file không nén.
+- **Hỗ trợ Schema Evolution:** Cấu trúc (schema) của dữ liệu được lưu trữ ngay trong metadata của file Parquet. Điều này cho phép schema có thể thay đổi theo thời gian (ví dụ: thêm một cột mới) mà không làm hỏng các file dữ liệu cũ, đảm bảo tính linh hoạt cho hệ thống.
+- **Tích hợp sâu với hệ sinh thái Big Data:** Parquet là định dạng tiêu chuẩn và được hỗ trợ bởi hầu hết các công cụ xử lý dữ liệu hiện đại như DuckDB, Spark, Presto, và Power BI, đảm bảo khả năng tương tác và mở rộng trong tương lai.
 
-Việc tổ chức dữ liệu theo cấu trúc này không chỉ giúp tối ưu hóa hiệu suất truy vấn mà còn hỗ trợ quản lý vòng đời dữ liệu và đảm bảo khả năng mở rộng của hệ thống khi lượng dữ liệu tăng lên theo thời gian.
+**2. Kỹ thuật Phân vùng Dữ liệu (Data Partitioning)**
+
+Để tránh tình trạng "quét toàn bộ" (full scan) trên một kho dữ liệu ngày càng phình to, dữ liệu được phân vùng một cách có chiến lược thành các thư mục logic. Các công cụ truy vấn như DuckDB có thể tận dụng cấu trúc này để "cắt tỉa" (partition pruning), tức là bỏ qua hoàn toàn các thư mục không chứa dữ liệu liên quan đến câu lệnh `WHERE`.
+
+Dữ liệu trong MinIO được phân vùng theo các cấp sau:
+
+1.  **Theo Mô hình dữ liệu (data_model):** `data_model=users`, `data_model=orders`, `data_model=products`,... Đây là cấp phân vùng cao nhất, giúp tách biệt hoàn toàn các thực thể dữ liệu khác nhau.
+2.  **Theo Kênh bán hàng (channel):** `channel=shopee`, `channel=lazada`,... Giúp dễ dàng phân tích hiệu suất của từng kênh một cách độc lập.
+3.  **Theo Thời gian (year, month, day):** `year=2025/month=09/day=20`. Đây là cách phân vùng phổ biến và hiệu quả nhất, vì hầu hết các truy vấn phân tích kinh doanh đều có yếu tố thời gian (ví dụ: "doanh thu theo ngày", "so sánh tháng này với tháng trước").
+
+**Ví dụ về một đường dẫn đầy đủ trong MinIO:**
+`datawarehouse/cleaned/data_model=orders/channel=shopee/year=2025/month=09/day=20/data.parquet`
+
+Sự kết hợp này cho phép các truy vấn được tối ưu hóa ở mức tối đa. Ví dụ, một truy vấn lấy doanh thu của Shopee trong 3 ngày đầu tháng 9 sẽ chỉ cần quét dữ liệu trong 3 thư mục con cụ thể, thay vì hàng trăm hoặc hàng nghìn thư mục khác.
+
+**3. Cấu trúc các Tầng lưu trữ trong MinIO**
+
+Hệ thống áp dụng kiến trúc đa tầng (multi-layered architecture) trong Data Warehouse, mỗi tầng có một vai trò và mục đích riêng:
+
+- **Tầng `raw`:**
+  - **Mục đích:** Lưu trữ dữ liệu thô, nguyên bản nhất được trích xuất từ các hệ thống nguồn (API, Database).
+  - **Định dạng:** Thường là JSON hoặc định dạng gốc của nguồn.
+  - **Vai trò:** Đóng vai trò như một bản sao lưu (backup) vĩnh viễn. Nếu có lỗi trong các bước xử lý sau, ta luôn có thể chạy lại pipeline từ dữ liệu gốc ở tầng này mà không cần phải gọi lại API.
+
+- **Tầng `staging`:**
+  - **Mục đích:** Chuyển đổi dữ liệu từ định dạng gốc sang định dạng Parquet.
+  - **Xử lý:** Ở tầng này, chỉ thực hiện các chuyển đổi cơ bản nhất như ép kiểu dữ liệu (ví dụ: chuỗi sang số, chuỗi sang ngày tháng) và chuẩn hóa tên cột. Không áp dụng các logic nghiệp vụ phức tạp.
+  - **Vai trò:** Là một tầng trung gian, chuẩn bị dữ liệu cho bước làm sạch sâu hơn, giúp tách biệt quá trình "load" và "transform".
+
+- **Tầng `cleaned`:**
+  - **Mục đích:** Chứa dữ liệu đã được làm sạch, chuẩn hóa, và làm giàu (enriched), sẵn sàng cho việc phân tích.
+  - **Xử lý:** Đây là nơi diễn ra các logic nghiệp vụ quan trọng: xử lý giá trị NULL, loại bỏ dữ liệu trùng lặp, kết hợp dữ liệu từ nhiều nguồn (join), tính toán các trường mới (ví dụ: `order_total`).
+  - **Vai trò:** Là "nguồn chân lý duy nhất" (Single Source of Truth) cho tất cả các báo cáo và dashboard. Power BI và các công cụ phân tích khác sẽ kết nối trực tiếp vào tầng này.
+
+Việc tổ chức dữ liệu theo cấu trúc nhiều tầng và phân vùng chặt chẽ không chỉ giúp tối ưu hóa hiệu suất mà còn tăng cường khả năng quản trị, bảo mật và đảm bảo chất lượng dữ liệu, tạo nền tảng vững chắc cho hệ thống phát triển trong tương lai.
 
 ## Triển khai và cài đặt hệ thống
 
 ### 4.1. Môi trường phát triển và công cụ
 
-Hệ thống được triển khai trong môi trường containerized với Docker, cho phép cô lập các thành phần và dễ dàng mở rộng. Các công cụ chính bao gồm:
+Hệ thống được triển khai trong một môi trường container hóa (containerized) hoàn toàn bằng Docker và Docker Compose. Cách tiếp cận này đảm bảo tính nhất quán giữa môi trường phát triển và sản xuất, đồng thời cho phép cô lập các thành phần và dễ dàng quản lý, mở rộng.
 
-- **Python 3.10:** Ngôn ngữ lập trình chính cho hệ thống, được sử dụng để xây dựng API giả lập và các script xử lý dữ liệu.
+**Các công nghệ và công cụ chính được sử dụng:**
 
-- **Apache Airflow 2.7.1:** Nền tảng workflow orchestration để lập lịch, thực thi và giám sát các DAG (Directed Acyclic Graphs) tự động hóa quy trình ELT. Airflow được triển khai với CeleryExecutor để xử lý đồng thời nhiều task.
+- **Python 3.10:** Ngôn ngữ lập trình chính cho toàn bộ hệ thống, từ việc xây dựng API giả lập, viết các script xử lý dữ liệu cho đến định nghĩa các DAG trong Airflow.
 
-- **MinIO:** Hệ thống lưu trữ object storage tương thích với S3, dùng để lưu trữ dữ liệu ở các giai đoạn khác nhau (raw, staging, cleaned). MinIO được cấu hình thông qua biến môi trường trong docker-compose.yml.
+- **Apache Airflow 2.7.1:** Đóng vai trò là "bộ não" của hệ thống, chịu trách nhiệm điều phối và tự động hóa toàn bộ quy trình ELT. Airflow được triển khai với CeleryExecutor để có khả năng xử lý đồng thời nhiều tác vụ, tăng hiệu suất cho các pipeline.
 
-- **DuckDB:** Công cụ phân tích dữ liệu cột tại chỗ (in-process columnar database) được sử dụng để truy vấn và xử lý dữ liệu trực tiếp từ các file Parquet trong MinIO mà không cần tải toàn bộ dữ liệu vào bộ nhớ.
+- **MinIO:** Một hệ thống lưu trữ đối tượng (object storage) hiệu suất cao và tương thích hoàn toàn với API của Amazon S3. MinIO được sử dụng làm kho dữ liệu trung tâm, lưu trữ dữ liệu ở tất cả các tầng (raw, staging, cleaned).
 
-- **FastAPI:** Framework Python hiện đại để xây dựng API giả lập, mô phỏng các endpoint từ các sàn thương mại điện tử và hệ thống nội bộ.
+- **DuckDB:** Một công cụ phân tích dữ liệu cột tại chỗ (in-process columnar database) mạnh mẽ. DuckDB được sử dụng để thực hiện các phép biến đổi (transform) phức tạp trực tiếp trên các file Parquet lưu trữ trong MinIO mà không cần một máy chủ cơ sở dữ liệu riêng biệt, giúp tối ưu hóa hiệu suất và đơn giản hóa kiến trúc.
 
-- **Power BI:** Công cụ trực quan hóa dữ liệu từ Microsoft, được sử dụng để xây dựng các dashboard phân tích dữ liệu.
+- **FastAPI:** Một framework Python hiện đại, hiệu suất cao để xây dựng API. Trong dự án này, FastAPI được dùng để tạo ra một hệ thống API giả lập, mô phỏng các endpoint từ các sàn thương mại điện tử, cung cấp nguồn dữ liệu đầu vào cho pipeline.
+
+- **Power BI:** Công cụ trực quan hóa dữ liệu hàng đầu của Microsoft, được sử dụng để kết nối vào dữ liệu đã được làm sạch, xây dựng các mô hình dữ liệu và tạo ra các dashboard phân tích kinh doanh tương tác.
+
+**Các dịch vụ (services) được triển khai qua Docker Compose:**
+
+Toàn bộ hệ thống được định nghĩa và quản lý thông qua file `docker-compose.yml`, bao gồm các dịch vụ chính sau:
+
+- **`postgres`:** Container chạy cơ sở dữ liệu PostgreSQL, được sử dụng làm backend để lưu trữ metadata (siêu dữ liệu) cho Airflow, chẳng hạn như thông tin về các DAG, lịch sử các lần chạy, và trạng thái của các task.
+- **`redis`:** Container chạy Redis, đóng vai trò là message broker cho CeleryExecutor của Airflow, giúp điều phối và gửi các tác vụ đến các worker.
+- **`airflow-webserver`:** Chạy giao diện người dùng web của Airflow, cho phép người dùng theo dõi, quản lý và tương tác với các DAG.
+- **`airflow-scheduler`:** Thành phần cốt lõi của Airflow, chịu trách nhiệm lập lịch và đưa các DAG vào hàng đợi để thực thi khi đến thời điểm được định sẵn.
+- **`airflow-worker`:** Các tiến trình thực thi tác vụ (task) của Airflow. Hệ thống có thể được mở rộng bằng cách tăng số lượng worker để xử lý nhiều tác vụ song song.
+- **`minio`:** Chạy dịch vụ lưu trữ MinIO, cung cấp các "bucket" để lưu trữ dữ liệu của pipeline.
+- **`fastapi-app`:** Chạy ứng dụng FastAPI, cung cấp các API endpoint giả lập dữ liệu.
+- **`flower`:** Một công cụ giám sát cho Celery, cung cấp giao diện web để theo dõi trạng thái của các worker và các tác vụ đang được xử lý.
 
 ### 4.2. Xây dựng Data Pipeline
 
@@ -280,7 +336,6 @@ fetch_json_task = PythonOperator(
 save_to_minio_task = PythonOperator(
     task_id='save_raw_json_to_minio',
     python_callable=save_raw_json_to_minio,
-    outlets=[LAZADA_ORDER_DATASET]
 )
 ```
 
@@ -308,8 +363,7 @@ parse_json = PythonOperator(
 
 convert_to_parquet = PythonOperator(
     task_id='convert_to_parquet',
-    python_callable=convert_to_parquet_and_save,
-    outlets=[SHOPEE_ORDER_PARQUET],
+    python_callable=convert_to_parquet_and_save
 )
 ```
 
@@ -377,13 +431,6 @@ Sau giai đoạn clean, một script Python được thực thi để đọc d�
      - Đánh dấu bản ghi có dữ liệu không hợp lệ để kiểm tra thêm
      - Loại bỏ các bản ghi không đáp ứng các ràng buộc nghiệp vụ quan trọng
 
-4. **Quy trình đảm bảo chất lượng tự động:**
-   - Tạo các thước đo (measures) trong Power BI để theo dõi chất lượng dữ liệu
-   - Xây dựng dashboard giám sát chất lượng dữ liệu hiển thị các chỉ số như:
-     - Số lượng và tỷ lệ dữ liệu không hợp lệ
-     - Phân bố của các loại lỗi dữ liệu
-     - Xu hướng chất lượng dữ liệu theo thời gian
-
 Ví dụ mã M trong Power Query để kiểm tra tính hợp lệ của đơn hàng:
 ````m
 let
@@ -411,7 +458,7 @@ Việc xây dựng các dashboard trong Power BI được thực hiện theo m�
 2. Thiết kế trực quan:
    - Lựa chọn bảng màu nhất quán cho toàn bộ dashboard
    - Sử dụng nguyên tắc thiết kế trực quan hiệu quả (data-ink ratio, nổi bật thông tin quan trọng)
-   - Tạo các bộ lọc (slicers) chung và tùy chỉnh navigation giữa các trang
+   - Tạo các bộ lọc (slicers) chung
 
 3. Kiểm thử và hoàn thiện:
    - Kiểm tra tính chính xác của dữ liệu trên dashboard
@@ -463,7 +510,7 @@ Việc xây dựng các dashboard trong Power BI được thực hiện theo m�
    
    **Các visual chính:**
    - Gauge hiển thị tỷ lệ giao hàng đúng hạn với mục tiêu
-   - Bar chart hiển thị thời gian giao hàng trung bình theo đối tác vận chuyển
+   - Bar chart hiển thị thời gian giao hàng trung bìssnh theo đối tác vận chuyển
    - Table hiển thị sản phẩm có tồn kho thấp cần bổ sung
    - Heat map hiển thị sản phẩm tồn kho cao theo danh mục
    - Line chart theo dõi xu hướng tồn kho theo thời gian
@@ -790,19 +837,13 @@ Hệ thống Data Warehouse hoàn chỉnh đã được xây dựng và triển 
 2. **Kiến trúc lưu trữ đa lớp:**
    - Dữ liệu được lưu trữ trong MinIO với cấu trúc thư mục phân cấp rõ ràng (raw, staging, cleaned).
    - Mỗi lớp lưu trữ phản ánh một giai đoạn xử lý dữ liệu, từ dữ liệu thô đến dữ liệu đã được làm sạch và chuẩn hóa.
-   - Định dạng Parquet được sử dụng cho lưu trữ hiệu quả với khả năng nén và truy vấn theo cột.
+   - Định dạng Parquet được chọn lựa phù hợp cho việc lưu trữ và truy vấn hiệu quả.
 
-3. **Xử lý dữ liệu hiệu quả với DuckDB:**
-   - DuckDB được sử dụng để truy vấn và xử lý dữ liệu trực tiếp từ MinIO, không cần tải xuống toàn bộ dữ liệu.
-   - Các phép biến đổi phức tạp được thực hiện thông qua các truy vấn SQL trong DuckDB, bao gồm chuẩn hóa dữ liệu, tính toán các trường phái sinh và kết hợp dữ liệu từ nhiều nguồn.
-   - Hiệu suất truy vấn cao nhờ kiến trúc cột của DuckDB và khả năng đọc trực tiếp file Parquet.
+3. **Ứng dụng công nghệ xử lý dữ liệu tiên tiến:** Việc sử dụng DuckDB để truy vấn và xử lý dữ liệu trực tiếp từ MinIO đã tận dụng được ưu điểm của cả hai công nghệ, mang lại hiệu suất cao và chi phí thấp. Khả năng thực hiện các phép biến đổi phức tạp thông qua SQL đơn giản hóa quy trình phát triển và bảo trì hệ thống.
 
-4. **Trực quan hóa dữ liệu:**
-   - Các dashboard được xây dựng trong Power BI với nhiều chỉ số kinh doanh quan trọng (doanh thu, lợi nhuận, hiệu suất theo kênh bán hàng, v.v.).
-   - Người dùng có thể tương tác với dashboard thông qua các bộ lọc và drill-down để khám phá dữ liệu theo nhiều khía cạnh.
-   - Các báo cáo được thiết kế trực quan, dễ hiểu và cung cấp cái nhìn tổng quan về hiệu suất kinh doanh.
+4. **Trực quan hóa dữ liệu hiệu quả:** Các dashboard trong Power BI được thiết kế để cung cấp cái nhìn tổng quan và chi tiết về hoạt động kinh doanh, giúp các nhà quản lý đưa ra quyết định dựa trên dữ liệu một cách kịp thời và chính xác.
 
-So với mục tiêu ban đầu, hệ thống đã đáp ứng đầy đủ các yêu cầu về tự động hóa quy trình, tính linh hoạt trong xử lý dữ liệu và khả năng cung cấp thông tin hữu ích cho việc ra quyết định kinh doanh.
+Giá trị của hệ thống đối với doanh nghiệp là rất lớn, từ việc tiết kiệm thời gian và nguồn lực trong việc thu thập và xử lý dữ liệu, đến khả năng cung cấp thông tin kinh doanh quan trọng một cách nhanh chóng và chính xác. Điều này giúp doanh nghiệp có thể phản ứng nhanh với các thay đổi thị trường, tối ưu hóa chiến lược kinh doanh và nâng cao lợi thế cạnh tranh.
 
 ### 5.2. Đánh giá hiệu quả hệ thống
 
