@@ -13,13 +13,6 @@ from typing import Dict, List, Any
 # Sử dụng BytesIO thay vì file tạm thời
 from io import BytesIO
 
-# Import datasets từ DAG extract_order
-from extract_order import (
-    SHOPEE_ORDER_DATASET, TIKTOK_ORDER_DATASET, 
-    TIKI_ORDER_DATASET, WEBSITE_ORDER_DATASET,
-    LAZADA_ORDER_DATASET
-)
-
 from staging_user import get_yesterday_file_paths, download_all_json_files, convert_to_parquet_and_save
 # Import thư viện kết nối MinIO
 from config.minio_config import (
@@ -27,11 +20,11 @@ from config.minio_config import (
 )
 
 # Định nghĩa asset đầu ra - với cấu trúc partition theo year/month/day
-SHOPEE_ORDER_PARQUET = Dataset("s3://minio/staging/shopee/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-TIKTOK_ORDER_PARQUET = Dataset("s3://minio/staging/tiktok/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-TIKI_ORDER_PARQUET = Dataset("s3://minio/staging/tiki/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-LAZADA_ORDER_PARQUET = Dataset("s3://minio/staging/lazada/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-WEBSITE_ORDER_PARQUET = Dataset("s3://minio/staging/website/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+# SHOPEE_ORDER_PARQUET = Dataset("s3://minio/staging/shopee/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+# TIKTOK_ORDER_PARQUET = Dataset("s3://minio/staging/tiktok/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+# TIKI_ORDER_PARQUET = Dataset("s3://minio/staging/tiki/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+# LAZADA_ORDER_PARQUET = Dataset("s3://minio/staging/lazada/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
+# WEBSITE_ORDER_PARQUET = Dataset("s3://minio/staging/website/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
 
 # Tham số chung cho DAG
 default_args = {
@@ -280,7 +273,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        # inlets=[LAZADA_ORDER_DATASET]
+        # #inlets=[LAZADA_ORDER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -296,7 +289,7 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        outlets=[LAZADA_ORDER_PARQUET],
+        #outlets=[LAZADA_ORDER_PARQUET],
     )
     # Task cuối cùng: Trigger DAG clean_order_data_lazada_with_duckdb
     # trigger_clean_dag = TriggerDagRunOperator(
@@ -334,7 +327,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[SHOPEE_ORDER_DATASET]
+        #inlets=[SHOPEE_ORDER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -350,7 +343,7 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        outlets=[SHOPEE_ORDER_PARQUET],
+        #outlets=[SHOPEE_ORDER_PARQUET],
     )
     # Task cuối cùng: Trigger DAG clean_order_data_shopee_with_duckdb
     # trigger_clean_dag = TriggerDagRunOperator(
@@ -388,7 +381,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[TIKI_ORDER_DATASET]
+        #inlets=[TIKI_ORDER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -404,7 +397,7 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        outlets=[TIKI_ORDER_PARQUET],
+        #outlets=[TIKI_ORDER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_data_tiki_with_duckdb
@@ -444,7 +437,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[WEBSITE_ORDER_DATASET]
+        #inlets=[WEBSITE_ORDER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -460,7 +453,7 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        outlets=[WEBSITE_ORDER_PARQUET],
+        #outlets=[WEBSITE_ORDER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_data_website_with_duckdb
@@ -500,7 +493,7 @@ with DAG(
     get_file_path = PythonOperator(
         task_id='get_yesterday_file_paths',
         python_callable=get_yesterday_file_paths,
-        inlets=[TIKTOK_ORDER_DATASET]
+        #inlets=[TIKTOK_ORDER_DATASET]
     )
 
     download_file = PythonOperator(
@@ -516,7 +509,7 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        outlets=[TIKTOK_ORDER_PARQUET],
+        #outlets=[TIKTOK_ORDER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_data_tiktok_with_duckdb
