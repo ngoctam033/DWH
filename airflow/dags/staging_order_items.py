@@ -308,7 +308,7 @@ def convert_to_parquet_and_save(**context):
         )
         
         # Log thành công
-        logging.info(f"Đã lưu thành công file Parquet: s3://{bucket_name or 'DEFAULT_BUCKET'}/{object_name}")
+        logging.info(f"Đã lưu thành công file Parquet: s3://{bucket_name}/{object_name}")
         
         # Lưu đường dẫn vào XCom
         context['ti'].xcom_push(key='parquet_file_path', value=object_name)
