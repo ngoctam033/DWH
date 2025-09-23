@@ -18,13 +18,6 @@ from config.minio_config import (
     get_object_name, download_json_from_minio, list_files_in_minio_dir
 )
 
-# Định nghĩa asset đầu ra - với cấu trúc partition theo year/month/day
-# SHOPEE_USER_PARQUET = Dataset("s3://minio/staging/shopee/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKTOK_USER_PARQUET = Dataset("s3://minio/staging/tiktok/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKI_USER_PARQUET = Dataset("s3://minio/staging/tiki/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# LAZADA_USER_PARQUET = Dataset("s3://minio/staging/lazada/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# WEBSITE_USER_PARQUET = Dataset("s3://minio/staging/website/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-
 # Tham số chung cho DAG
 default_args = {
     'owner': 'airflow',

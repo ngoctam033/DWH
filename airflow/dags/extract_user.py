@@ -12,13 +12,6 @@ from config.minio_config import (
     get_object_name, upload_json_to_minio
 )
 
-# Định nghĩa các Dataset (asset) cho từng kênh theo cấu trúc mới (có partition)
-# SHOPEE_USER_DATASET = Dataset("s3://minio/raw/shopee/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKTOK_USER_DATASET = Dataset("s3://minio/raw/tiktok/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# LAZADA_USER_DATASET = Dataset("s3://minio/raw/lazada/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKI_USER_DATASET = Dataset("s3://minio/raw/tiki/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# WEBSITE_USER_DATASET = Dataset("s3://minio/raw/website/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-
 # Task 1: Gọi API lấy dữ liệu JSON từ nhiều nguồn khác nhau
 def fetch_json_from_api(**context):
     logger = logging.getLogger("airflow.task")

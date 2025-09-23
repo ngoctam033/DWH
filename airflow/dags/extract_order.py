@@ -14,13 +14,6 @@ from config.minio_config import (
 
 from extract_user import fetch_json_from_api, save_raw_json_to_minio
 
-# Định nghĩa các Dataset (asset) cho từng kênh theo cấu trúc mới (có partition)
-# SHOPEE_ORDER_DATASET = Dataset("s3://minio/raw/shopee/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKTOK_ORDER_DATASET = Dataset("s3://minio/raw/tiktok/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# LAZADA_ORDER_DATASET = Dataset("s3://minio/raw/lazada/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKI_ORDER_DATASET = Dataset("s3://minio/raw/tiki/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# WEBSITE_ORDER_DATASET = Dataset("s3://minio/raw/website/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-
 # Định nghĩa DAG
 default_args = {
     'owner': 'airflow',

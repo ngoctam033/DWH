@@ -15,16 +15,6 @@ from io import BytesIO
 
 from staging_user import get_yesterday_file_paths, download_all_json_files, convert_to_parquet_and_save
 # Import thư viện kết nối MinIO
-from config.minio_config import (
-    get_object_name, download_json_from_minio
-)
-
-# Định nghĩa asset đầu ra - với cấu trúc partition theo year/month/day
-# SHOPEE_ORDER_PARQUET = Dataset("s3://minio/staging/shopee/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKTOK_ORDER_PARQUET = Dataset("s3://minio/staging/tiktok/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKI_ORDER_PARQUET = Dataset("s3://minio/staging/tiki/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-# LAZADA_ORDER_PARQUET = Dataset("s3://minio/staging/lazada/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
-# WEBSITE_ORDER_PARQUET = Dataset("s3://minio/staging/website/orders/year={{execution_date.year}}/month={{execution_date.strftime('%m')}}/day={{execution_date.strftime('%d')}}/{{ds}}_data.parquet")
 
 # Tham số chung cho DAG
 default_args = {

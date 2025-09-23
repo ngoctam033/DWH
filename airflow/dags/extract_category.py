@@ -15,8 +15,6 @@ default_args = {
     'retries': 0,
 }
 
-# ORDER_CHANNEL_CLEANED_PARQUET = Dataset("s3://minio/cleaned/erp/order_channel/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-
 def extract_sub_category(**context):
     """Extract data from sub_category table and push to XCom"""
     try:

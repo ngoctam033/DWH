@@ -13,24 +13,9 @@ from datetime import datetime, timedelta
 from io import BytesIO
 import os
 
-# Import datasets từ DAG extract_user
-from extract_user import (
-    SHOPEE_USER_DATASET, TIKTOK_USER_DATASET, 
-    TIKI_USER_DATASET, WEBSITE_USER_DATASET,
-    LAZADA_USER_DATASET
-)
-
-# Import thư viện kết nối MinIO
 from config.minio_config import (
     get_object_name, download_json_from_minio, list_files_in_minio_dir
 )
-
-# Định nghĩa asset đầu ra - với cấu trúc partition theo year/month/day
-# SHOPEE_USER_PARQUET = Dataset("s3://minio/staging/shopee/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKTOK_USER_PARQUET = Dataset("s3://minio/staging/tiktok/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKI_USER_PARQUET = Dataset("s3://minio/staging/tiki/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# LAZADA_USER_PARQUET = Dataset("s3://minio/staging/lazada/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# WEBSITE_USER_PARQUET = Dataset("s3://minio/staging/website/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
 
 # Tham số chung cho DAG
 default_args = {
@@ -334,8 +319,6 @@ def convert_to_parquet_and_save(**context):
         logging.error(f"Lỗi khi chuyển đổi và lưu file Parquet: {e}")
         raise
 
-# --- Kết thúc các hàm xử lý ---
-
 # DAG cho Lazada
 with DAG(
     dag_id='transform_lazada_order_items_to_parquet',
@@ -377,16 +360,6 @@ with DAG(
         python_callable=convert_to_parquet_and_save,
         #outlets=[LAZADA_USER_PARQUET],
     )
-
-    # Task cuối cùng: Trigger DAG clean_order_items_data_lazada_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_lazada',
-    #     trigger_dag_id='clean_order_items_data_lazada_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
@@ -433,16 +406,6 @@ with DAG(
         #outlets=[SHOPEE_USER_PARQUET],
     )
 
-    # Task cuối cùng: Trigger DAG clean_order_items_data_shopee_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_shopee',
-    #     trigger_dag_id='clean_order_items_data_shopee_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
-
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
 
@@ -487,16 +450,6 @@ with DAG(
         python_callable=convert_to_parquet_and_save,
         #outlets=[TIKI_USER_PARQUET],
     )
-
-    # Task cuối cùng: Trigger DAG clean_order_items_data_tiki_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_tiki',
-    #     trigger_dag_id='clean_order_items_data_tiki_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
@@ -543,16 +496,6 @@ with DAG(
         #outlets=[TIKTOK_USER_PARQUET],
     )
 
-    # Task cuối cùng: Trigger DAG clean_order_items_data_tiktok_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_tiktok',
-    #     trigger_dag_id='clean_order_items_data_tiktok_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
-
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
 
@@ -597,16 +540,6 @@ with DAG(
         python_callable=convert_to_parquet_and_save,
         #outlets=[WEBSITE_USER_PARQUET],
     )
-
-    # Task cuối cùng: Trigger DAG clean_order_items_data_website_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_website',
-    #     trigger_dag_id='clean_order_items_data_website_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
