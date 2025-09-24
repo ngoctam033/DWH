@@ -525,7 +525,6 @@ Dựa trên các yêu cầu phân tích từ doanh nghiệp, các chỉ số kin
 - **Inventory & Logistics Dashboard:** Theo dõi tồn kho và trạng thái đơn hàng vận chuyển.
 
 ![Giao diện Sales Dashboard](sale-dashboard.jpeg)
-![Giao diện Inventory & Logistics Dashboard](link-den-hinh-inventory-dashboard.jpg)
 ### 3.2. Thiết kế kiến trúc hệ thống
 
 Kiến trúc hệ thống đã được triển khai theo mô hình ELT (Extract - Load - Transform), tận dụng các công cụ mã nguồn mở để xây dựng một giải pháp tối ưu cho doanh nghiệp vừa và nhỏ.
@@ -533,7 +532,7 @@ Kiến trúc hệ thống đã được triển khai theo mô hình ELT (Extract
 **Kiến trúc tổng thể:**
 Kiến trúc hệ thống được xây dựng với mục tiêu tự động hóa toàn bộ luồng dữ liệu, từ nguồn đến dashboard, với khả năng mở rộng và tính ổn định cao.
 
-![Kiến trúc tổng thể của hệ thống](link-den-hinh-kien-truc-tong-the.jpg)
+![Kiến trúc tổng thể của hệ thống](work-flow.jpeg)
 
 **Thành phần nguồn dữ liệu:**
 - Dữ liệu được thu thập từ các API giả lập được phát triển bằng FastAPI, trả về định dạng JSON mô phỏng dữ liệu từ các sàn thương mại điện tử (Shopee, Lazada, Tiki, Tiktok Shop) và website riêng.
