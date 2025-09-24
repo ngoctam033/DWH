@@ -102,6 +102,257 @@ Data Pipeline là một chuỗi các bước tự động được thiết kế 
     - **Lựa chọn loại biểu đồ phù hợp:** Sử dụng các loại biểu đồ khác nhau (biểu đồ cột, biểu đồ đường, biểu đồ tròn) tùy thuộc vào loại dữ liệu và thông điệp muốn truyền tải.
     - **Tập trung vào câu chuyện dữ liệu:** Trực quan hóa nên kể một câu chuyện có ý nghĩa, giúp người dùng trả lời các câu hỏi kinh doanh cụ thể.
     - **Thiết kế tương tác:** Cung cấp các chức năng tương tác (như bộ lọc, drill-down) để người dùng có thể tự khám phá dữ liệu. 
+
+### 2.3. So sánh các công nghệ xử lý dữ liệu phân tích
+
+Việc lựa chọn công nghệ phù hợp cho xử lý dữ liệu phân tích là một quyết định quan trọng, ảnh hưởng trực tiếp đến hiệu suất, chi phí và khả năng mở rộng của hệ thống Data Warehouse. Dưới đây là phân tích so sánh giữa ba giải pháp xử lý dữ liệu hàng đầu hiện nay: DuckDB, Apache Spark và Google BigQuery.
+
+#### Bảng so sánh đặc điểm chính
+
+| **Tiêu chí** | **DuckDB** | **Apache Spark** | **Google BigQuery** |
+|--------------|------------|------------------|---------------------|
+| **Kiến trúc** | Cơ sở dữ liệu phân tích cột nhúng trong quá trình | Framework xử lý phân tán | Dịch vụ kho dữ liệu serverless trên đám mây |
+| **Quy mô dữ liệu tối ưu** | GB đến TB nhỏ | TB đến PB | TB đến PB+ |
+| **Mô hình triển khai** | Local/Single node | Cluster/phân tán | Dịch vụ đám mây hoàn toàn |
+| **Độ phức tạp khi triển khai** | Rất thấp (thư viện nhúng) | Cao (cấu hình cluster, điều chỉnh tham số) | Trung bình (dịch vụ quản lý) |
+| **Hiệu suất với dữ liệu nhỏ-trung bình** | Xuất sắc | Thấp hơn (overhead của phân tán) | Tốt nhưng phụ thuộc vào slot |
+| **Khả năng mở rộng** | Hạn chế (bộ nhớ máy đơn) | Rất cao (thêm node) | Rất cao (tự động) |
+| **Chi phí** | Miễn phí, mã nguồn mở | Miễn phí (mã nguồn mở), chi phí phần cứng | Trả tiền theo lượng dữ liệu quét/tính toán |
+| **Tích hợp với Parquet/formats cột** | Tích hợp sâu, truy vấn trực tiếp | Hỗ trợ tốt | Hỗ trợ tốt, tối ưu cho đám mây |
+| **Cộng đồng & hỗ trợ** | Đang phát triển nhanh | Rất lớn, trưởng thành | Hỗ trợ thương mại từ Google |
+| **Môi trường phù hợp** | Phân tích cục bộ, Data pipeline nhẹ | Xử lý dữ liệu lớn, ML | Phân tích dữ liệu lớn trên đám mây |
+
+#### Phân tích chi tiết
+
+##### 1. DuckDB
+
+DuckDB là một cơ sở dữ liệu phân tích dạng cột (columnar analytical database) được thiết kế để hoạt động như một thư viện nhúng trong quá trình (in-process). Mô hình này tương tự SQLite nhưng được tối ưu hóa đặc biệt cho các tác vụ phân tích OLAP.
+
+**Điểm mạnh:**
+- Hiệu suất cực kỳ cao với dữ liệu vừa và nhỏ, đặc biệt khi xử lý định dạng cột như Parquet
+- Đơn giản để triển khai, không yêu cầu cài đặt máy chủ riêng
+- Có thể truy vấn dữ liệu trực tiếp từ nhiều nguồn (Parquet, CSV, JSON) mà không cần tải toàn bộ vào bộ nhớ
+- Tiêu thụ ít tài nguyên, phù hợp với môi trường giới hạn
+- Tích hợp tốt với các công cụ phân tích dữ liệu như Python, R
+
+**Điểm yếu:**
+- Giới hạn về khả năng xử lý dữ liệu rất lớn (petabyte)
+- Không có khả năng xử lý phân tán tự nhiên
+- Cộng đồng và hệ sinh thái nhỏ hơn so với các giải pháp trưởng thành
+
+##### 2. Apache Spark
+
+Apache Spark là một framework xử lý dữ liệu phân tán mạnh mẽ, được thiết kế để xử lý dữ liệu lớn trên các cụm máy tính.
+
+**Điểm mạnh:**
+- Khả năng mở rộng gần như không giới hạn thông qua thêm node
+- Hỗ trợ xử lý dữ liệu batch và streaming
+- Hệ sinh thái phong phú với các module ML, Graph, SQL
+- Tính năng xử lý đa dạng (SQL, dataframe, ML)
+- Cộng đồng lớn và được sử dụng rộng rãi trong doanh nghiệp
+
+**Điểm yếu:**
+- Tốn kém về tài nguyên, ngay cả với dữ liệu nhỏ
+- Phức tạp trong việc triển khai và tối ưu hóa
+- Thời gian khởi động và overhead lớn cho công việc nhỏ
+- Yêu cầu kiến thức chuyên sâu để vận hành hiệu quả
+
+##### 3. Google BigQuery
+
+BigQuery là dịch vụ kho dữ liệu serverless hoàn toàn được quản lý trên nền tảng Google Cloud, cho phép phân tích dữ liệu lớn bằng SQL.
+
+**Điểm mạnh:**
+- Khả năng mở rộng tự động, không cần quản lý cơ sở hạ tầng
+- Xử lý hiệu quả dữ liệu cực lớn (petabyte+)
+- Tích hợp sâu với hệ sinh thái Google Cloud
+- Mô hình serverless giảm chi phí quản lý vận hành
+- Tính năng chia sẻ dữ liệu và bảo mật doanh nghiệp mạnh mẽ
+
+**Điểm yếu:**
+- Chi phí có thể tăng nhanh với khối lượng truy vấn lớn
+- Phụ thuộc vào Google Cloud, khó di chuyển sang nền tảng khác
+- Không phù hợp với môi trường local hoặc hybrid
+- Độ trễ khởi động truy vấn cao hơn với công việc nhỏ
+
+#### Lý do lựa chọn DuckDB cho dự án
+
+Dự án này đã lựa chọn DuckDB làm công nghệ xử lý dữ liệu chính dựa trên các yếu tố sau:
+
+1. **Phù hợp với quy mô dữ liệu:** Khối lượng dữ liệu bán hàng từ các kênh TMĐT của doanh nghiệp vừa và nhỏ nằm trong phạm vi xử lý hiệu quả của DuckDB (gigabyte đến terabyte nhỏ).
+2. **Đơn giản hóa kiến trúc:** DuckDB cho phép xử lý dữ liệu trực tiếp từ MinIO mà không cần một hệ thống cơ sở dữ liệu riêng biệt, giảm thiểu số lượng thành phần trong hệ thống.
+3. **Hiệu suất với file Parquet:** DuckDB có hiệu năng vượt trội khi xử lý dữ liệu định dạng cột như Parquet, đặc biệt là các phép lọc, tổng hợp và phân tích thường dùng trong trường hợp này.
+4. **Chi phí triển khai thấp:** Là giải pháp mã nguồn mở, không tốn chi phí license và yêu cầu tài nguyên hệ thống thấp, phù hợp với ngân sách của doanh nghiệp vừa và nhỏ.
+5. **Tích hợp dễ dàng:** DuckDB tích hợp liền mạch với Python trong các script Airflow, cho phép xử lý dữ liệu hiệu quả ngay trong luồng ELT mà không cần chuyển dữ liệu giữa các hệ thống.
+6. **Thời gian phát triển nhanh:** Với cú pháp SQL quen thuộc và cấu hình đơn giản, việc phát triển và bảo trì các pipeline dữ liệu trở nên dễ dàng hơn đáng kể so với các giải pháp phức tạp như Spark.
+
+Trong khi Apache Spark và Google BigQuery sẽ trở thành lựa chọn tốt hơn khi doanh nghiệp mở rộng với khối lượng dữ liệu lớn hơn nhiều hoặc yêu cầu phân tích thời gian thực, DuckDB hiện là giải pháp cân bằng tối ưu giữa hiệu suất, chi phí và độ phức tạp cho nhu cầu hiện tại của dự án.
+
+### 2.4. Phân biệt Hệ thống Xử lý Giao dịch (OLTP) và Xử lý Phân tích (OLAP)
+
+Trong kiến trúc dữ liệu doanh nghiệp, việc phân biệt giữa hai hệ thống xử lý dữ liệu nền tảng là **OLTP (Online Transaction Processing)** và **OLAP (Online Analytical Processing)** có vai trò quyết định đến thiết kế và hiệu năng của toàn bộ giải pháp.
+
+Hệ thống **OLTP** được thiết kế để tối ưu hóa cho các tác vụ xử lý giao dịch tần suất cao, thời gian thực. Mục tiêu chính của OLTP là đảm bảo tính toàn vẹn, nhất quán của dữ liệu và tốc độ thực thi nhanh cho các hoạt động ghi, đọc, cập nhật, xóa (CRUD) ở mức độ chi tiết. Các hệ thống như ERP, quản lý bán hàng (POS), hay hệ thống ngân hàng lõi là những ví dụ điển hình.
+
+Hệ thống **OLAP**, ngược lại, được tối ưu hóa cho các truy vấn phân tích phức tạp trên một khối lượng dữ liệu lịch sử khổng lồ. Mục tiêu của OLAP không phải là xử lý giao dịch mà là cung cấp cái nhìn đa chiều, tổng hợp về dữ liệu để hỗ trợ các hoạt động phân tích kinh doanh (Business Intelligence), báo cáo và hỗ trợ ra quyết định. **Data Warehouse** là một ứng dụng điển hình của kiến trúc OLAP.
+
+#### Bảng so sánh OLTP và OLAP
+
+| **Tiêu chí**             | **OLTP (Online Transaction Processing)** | **OLAP (Online Analytical Processing)** |
+|---------------------------|------------------------------------------|------------------------------------------|
+| **Chức năng chính**       | Ghi nhận và xử lý các giao dịch nghiệp vụ hàng ngày. | Tổng hợp, truy vấn và phân tích dữ liệu lịch sử. |
+| **Đặc tính truy vấn**     | Ngắn, đơn giản, thường xuyên (CRUD).     | Phức tạp, yêu cầu tổng hợp, tính toán trên nhiều chiều dữ liệu. |
+| **Mô hình dữ liệu**       | Mô hình quan hệ, chuẩn hóa cao (thường là 3NF) để tránh dư thừa dữ liệu. | Mô hình chiều (Dimensional Modeling) như Star/Snowflake Schema, phi chuẩn hóa để tối ưu tốc độ đọc. |
+| **Đặc tính dữ liệu**      | Dữ liệu chi tiết, mang tính thời điểm, được cập nhật liên tục. | Dữ liệu lịch sử, được tổng hợp, chủ yếu là đọc, ít khi cập nhật. |
+| **Hiệu năng**             | Tối ưu cho các tác vụ ghi và cập nhật nhanh. | Tối ưu cho các truy vấn đọc và tổng hợp dữ liệu lớn. |
+| **Đối tượng sử dụng**     | Nhân viên nghiệp vụ, hệ thống ứng dụng tự động. | Nhà phân tích dữ liệu, quản lý cấp cao, các công cụ BI. |
+| **Ứng dụng điển hình**    | Hệ thống ERP, CRM, quản lý bán hàng (POS), hệ thống đặt vé. | Hệ thống Data Warehouse, Data Mart, hệ thống báo cáo quản trị. |
+
+#### Lý do lựa chọn kiến trúc OLAP cho đề tài
+
+Dựa trên các phân tích trên, việc lựa chọn kiến trúc OLAP cho đề tài là một quyết định mang tính tất yếu, xuất phát từ các yêu cầu cốt lõi của bài toán:
+
+- **Mục tiêu phân tích, không phải giao dịch:** Đề tài không nhằm mục đích xử lý các giao dịch bán hàng thời gian thực mà tập trung vào việc tổng hợp và phân tích dữ liệu lịch sử từ nhiều nguồn để tìm ra các xu hướng, mẫu hình kinh doanh. Đây chính là chức năng cốt lõi của hệ thống OLAP.
+
+- **Yêu cầu về truy vấn phức tạp:** Việc xây dựng các dashboard đòi hỏi các truy vấn tổng hợp (aggregation), gom nhóm (grouping) và phân tích đa chiều (ví dụ: doanh thu theo thời gian, theo kênh, theo sản phẩm). Kiến trúc OLAP với mô hình dữ liệu phi chuẩn hóa được thiết kế đặc biệt để đáp ứng các loại truy vấn này với hiệu suất cao.
+
+- **Tách biệt hệ thống phân tích và vận hành:** Việc xây dựng một Data Warehouse (hệ thống OLAP) riêng biệt đảm bảo rằng các truy vấn phân tích nặng nề sẽ không làm ảnh hưởng đến hiệu năng của các hệ thống OLTP (như ERP, website bán hàng), vốn đòi hỏi tốc độ xử lý giao dịch nhanh.
+
+### 2.4. So sánh các công nghệ lưu trữ dữ liệu phân tích: MinIO, Hadoop HDFS, và Microsoft OneLake
+
+Việc lựa chọn nền tảng lưu trữ dữ liệu phù hợp là yếu tố then chốt quyết định hiệu quả, khả năng mở rộng và chi phí của hệ thống Data Warehouse hiện đại. Dưới đây là phần giới thiệu và so sánh ba giải pháp lưu trữ phổ biến: MinIO, Hadoop HDFS và Microsoft OneLake.
+
+#### Bảng so sánh đặc điểm chính
+
+| **Tiêu chí**                | **MinIO**                                   | **Hadoop HDFS**                         | **Microsoft OneLake**                        |
+|-----------------------------|---------------------------------------------|-----------------------------------------|----------------------------------------------|
+| **Kiến trúc**               | Lưu trữ đối tượng (object storage), tương thích S3 | Hệ thống file phân tán (distributed file system) | Lakehouse-as-a-Service, tích hợp sâu với Fabric |
+| **Triển khai**              | On-premises, cloud, hybrid                  | On-premises, cloud (qua Hadoop distros) | Cloud (Azure), tích hợp Power BI, Synapse    |
+| **Khả năng mở rộng**        | Rất cao, scale-out dễ dàng                  | Rất cao, scale-out theo cluster         | Rất cao, tự động mở rộng trên Azure          |
+| **Tương thích API**         | S3 API, đa nền tảng                         | API riêng (HDFS), tích hợp Hadoop stack | S3 API, ADLS Gen2 API, Fabric API            |
+| **Quản lý dữ liệu**         | Đơn giản, giao diện web, CLI                | Quản lý phức tạp, cần cluster manager   | Quản lý tập trung qua Fabric Portal          |
+| **Bảo mật**                 | TLS, IAM, bucket policy                     | Kerberos, ACL, encryption               | Azure AD, RBAC, Data Governance              |
+| **Tích hợp phân tích**      | DuckDB, Spark, Presto, Trino, Power BI      | Spark, Hive, Impala, Presto             | Power BI, Synapse, Spark, Data Factory       |
+| **Chi phí**                 | Miễn phí (mã nguồn mở), trả phí cho support | Miễn phí (mã nguồn mở), chi phí phần cứng| Trả phí theo dung lượng và dịch vụ Azure     |
+| **Tính sẵn sàng**           | Hỗ trợ replication, distributed erasure code| Hỗ trợ replication, HA                  | SLA cao, geo-redundancy trên Azure           |
+| **Môi trường phù hợp**      | Doanh nghiệp vừa/nhỏ, hybrid, cloud-native  | Doanh nghiệp lớn, Big Data truyền thống | Doanh nghiệp sử dụng hệ sinh thái Microsoft  |
+
+#### Phân tích chi tiết
+
+##### 1. MinIO
+
+MinIO là giải pháp lưu trữ đối tượng mã nguồn mở, tương thích hoàn toàn với giao diện S3 của Amazon. MinIO có thể triển khai trên hạ tầng vật lý, đám mây hoặc hybrid, rất phù hợp cho các hệ thống Data Lake/Data Warehouse hiện đại nhờ khả năng tích hợp tốt với các công cụ phân tích như DuckDB, Spark, Presto, Power BI.
+
+**Ưu điểm:**
+- Dễ triển khai, cấu hình đơn giản, giao diện quản trị trực quan
+- Tương thích S3, dễ tích hợp với nhiều hệ sinh thái Big Data/Cloud
+- Hiệu suất cao, hỗ trợ phân tán, replication, erasure code
+- Phù hợp cho cả môi trường on-premises và cloud-native
+
+**Nhược điểm:**
+- Một số tính năng nâng cao (multi-site replication, object locking) cần trả phí
+- Không có hệ sinh thái phân tích dữ liệu tích hợp sẵn như các giải pháp cloud lớn
+
+##### 2. Hadoop HDFS
+
+Hadoop Distributed File System (HDFS) là hệ thống file phân tán truyền thống, nền tảng của các hệ thống Big Data như Hadoop, Spark, Hive. HDFS được thiết kế để lưu trữ và xử lý dữ liệu lớn trên các cluster vật lý.
+
+**Ưu điểm:**
+- Khả năng mở rộng rất lớn, phù hợp với Big Data truyền thống
+- Tích hợp sâu với các công cụ phân tích như Spark, Hive, Impala
+- Hỗ trợ replication, đảm bảo tính sẵn sàng và an toàn dữ liệu
+
+**Nhược điểm:**
+- Quản trị phức tạp, cần đội ngũ vận hành chuyên sâu
+- Không tương thích S3, khó tích hợp với các dịch vụ cloud hiện đại
+- Không phù hợp với các workload cloud-native hoặc hybrid
+
+##### 3. Microsoft OneLake
+
+OneLake là nền tảng lưu trữ dữ liệu lakehouse thế hệ mới của Microsoft, tích hợp sâu với Microsoft Fabric, Power BI, Synapse Analytics. OneLake cung cấp khả năng lưu trữ tập trung, quản lý dữ liệu cho toàn bộ hệ sinh thái Microsoft trên Azure.
+
+**Ưu điểm:**
+- Tích hợp liền mạch với Power BI, Synapse, Data Factory, AI/ML
+- Quản lý tập trung, bảo mật mạnh mẽ với Azure AD, RBAC
+- Hỗ trợ đa định dạng (Parquet, Delta, CSV), truy cập qua S3 API, ADLS Gen2 API
+- Tự động mở rộng, tối ưu chi phí theo nhu cầu sử dụng
+
+**Nhược điểm:**
+- Phụ thuộc vào Azure, khó triển khai on-premises hoặc hybrid
+- Chi phí có thể tăng nhanh với khối lượng dữ liệu lớn
+- Một số tính năng nâng cao cần đăng ký dịch vụ bổ sung
+
+#### Lý do lựa chọn MinIO cho dự án
+
+Dự án lựa chọn MinIO vì các lý do sau:
+- **Tương thích S3:** Dễ dàng tích hợp với các công cụ phân tích hiện đại như DuckDB, Spark, Power BI.
+- **Triển khai linh hoạt:** Có thể triển khai trên máy chủ vật lý, cloud hoặc hybrid, phù hợp với doanh nghiệp vừa và nhỏ.
+- **Hiệu suất cao, chi phí thấp:** Miễn phí, mã nguồn mở, không phụ thuộc vào nền tảng cloud lớn.
+- **Đơn giản hóa quản trị:** Giao diện quản trị trực quan, dễ vận hành, không cần đội ngũ chuyên sâu như Hadoop.
+
+MinIO là lựa chọn tối ưu cho các hệ thống Data Warehouse hiện đại quy mô vừa và nhỏ, cần sự linh hoạt, hiệu suất và khả năng tích hợp tốt với các công cụ phân tích dữ liệu mới nhất.
+
+### 2.5. So sánh các công cụ trực quan hóa dữ liệu: Power BI và Google Data Studio
+
+Việc lựa chọn công cụ trực quan hóa dữ liệu phù hợp đóng vai trò quan trọng trong việc khai thác giá trị từ kho dữ liệu, giúp doanh nghiệp dễ dàng theo dõi, phân tích và ra quyết định dựa trên dữ liệu. Dưới đây là phần giới thiệu và so sánh hai công cụ phổ biến: Power BI và Google Data Studio.
+
+#### Bảng so sánh đặc điểm chính
+
+| **Tiêu chí**                | **Power BI**                                 | **Google Data Studio**                      |
+|-----------------------------|----------------------------------------------|---------------------------------------------|
+| **Nhà phát triển**          | Microsoft                                   | Google                                      |
+| **Triển khai**              | Desktop, Cloud (Power BI Service), Mobile   | Cloud (Web-based), miễn phí                 |
+| **Tích hợp dữ liệu**        | Rất mạnh, hỗ trợ nhiều nguồn (SQL, Excel, Parquet, API, Azure, AWS, Google Cloud, v.v.) | Tốt, tập trung vào Google ecosystem (BigQuery, Sheets, Analytics, v.v.), hỗ trợ API và CSV |
+| **Khả năng xử lý dữ liệu**  | Mạnh mẽ, hỗ trợ DAX, Power Query, mô hình hóa dữ liệu phức tạp | Chủ yếu trực quan hóa, xử lý dữ liệu đơn giản, ít tính năng ETL |
+| **Tính năng trực quan hóa** | Đa dạng, nhiều loại biểu đồ, custom visuals, drill-down, drill-through, bookmarks, dashboard tương tác cao | Đầy đủ biểu đồ cơ bản, hỗ trợ custom charts qua cộng đồng, dashboard tương tác tốt |
+| **Khả năng chia sẻ**        | Chia sẻ qua Power BI Service, workspace, publish to web, embed, xuất PDF/PPT | Chia sẻ qua link, embed, xuất PDF, kiểm soát quyền truy cập đơn giản |
+| **Bảo mật & quản trị**      | Hỗ trợ Azure AD, RLS (Row Level Security), workspace, quản lý người dùng chi tiết | Quản lý qua Google Account, phân quyền đơn giản, không có RLS nâng cao |
+| **Chi phí**                 | Miễn phí (Desktop), trả phí cho Power BI Pro/Service | Miễn phí (đa số tính năng), trả phí cho BigQuery hoặc nguồn dữ liệu doanh nghiệp |
+| **Cộng đồng & hỗ trợ**      | Rất lớn, tài liệu phong phú, nhiều mẫu dashboard | Lớn, tài liệu đầy đủ, cộng đồng Google mạnh |
+| **Môi trường phù hợp**      | Doanh nghiệp vừa/lớn, nhu cầu phân tích phức tạp, tích hợp nhiều nguồn | Doanh nghiệp nhỏ/vừa, startup, nhu cầu báo cáo nhanh, ưu tiên Google Cloud |
+
+#### Phân tích chi tiết
+
+##### 1. Power BI
+
+Power BI là bộ công cụ BI mạnh mẽ của Microsoft, hỗ trợ từ việc kết nối, xử lý, mô hình hóa đến trực quan hóa dữ liệu. Power BI nổi bật với khả năng tích hợp nhiều nguồn dữ liệu, xử lý dữ liệu lớn, hỗ trợ các phép tính phức tạp với DAX, và khả năng xây dựng dashboard tương tác chuyên sâu. Ngoài ra, Power BI còn hỗ trợ bảo mật dữ liệu ở mức dòng (Row Level Security), chia sẻ báo cáo linh hoạt qua Power BI Service, và tích hợp tốt với hệ sinh thái Microsoft (Azure, Office 365).
+
+**Ưu điểm:**
+- Xử lý và mô hình hóa dữ liệu mạnh mẽ, phù hợp cho phân tích chuyên sâu
+- Hỗ trợ nhiều nguồn dữ liệu, kể cả file Parquet, cơ sở dữ liệu lớn, API
+- Dashboard tương tác cao, nhiều loại biểu đồ, hỗ trợ custom visuals
+- Bảo mật và quản trị người dùng chi tiết, phù hợp doanh nghiệp lớn
+- Có thể xuất báo cáo ra PDF, PowerPoint, embed vào website hoặc ứng dụng
+
+**Nhược điểm:**
+- Một số tính năng nâng cao yêu cầu trả phí (Power BI Pro/Service)
+- Giao diện và thao tác có thể phức tạp với người mới
+- Tối ưu nhất khi dùng trong hệ sinh thái Microsoft
+
+##### 2. Google Data Studio (Looker Studio)
+
+Google Data Studio (nay là Looker Studio) là công cụ trực quan hóa dữ liệu miễn phí, chạy hoàn toàn trên nền web, tập trung vào sự đơn giản, dễ chia sẻ và tích hợp sâu với các dịch vụ Google như BigQuery, Google Sheets, Google Analytics.
+
+**Ưu điểm:**
+- Miễn phí, dễ sử dụng, giao diện trực quan, thao tác kéo thả
+- Tích hợp mạnh với Google Cloud, BigQuery, Sheets, Analytics
+- Chia sẻ báo cáo dễ dàng qua link, embed, xuất PDF
+- Phù hợp cho báo cáo nhanh, dashboard marketing, startup, doanh nghiệp nhỏ
+
+**Nhược điểm:**
+- Khả năng xử lý và mô hình hóa dữ liệu hạn chế, không phù hợp cho phân tích phức tạp
+- Hỗ trợ nguồn dữ liệu ngoài Google ecosystem còn hạn chế
+- Không có tính năng bảo mật nâng cao như RLS
+- Ít tính năng custom visuals hơn Power BI
+
+#### Lý do lựa chọn Power BI cho dự án
+
+Dự án lựa chọn Power BI vì các lý do sau:
+- **Tích hợp đa nguồn:** Kết nối tốt với file Parquet, DuckDB, MinIO, các cơ sở dữ liệu lớn và API.
+- **Khả năng phân tích mạnh:** Hỗ trợ DAX, Power Query, phù hợp cho các dashboard phân tích KPI, drill-down, phân tích đa chiều.
+- **Bảo mật và chia sẻ:** Hỗ trợ chia sẻ nội bộ, bảo mật dữ liệu, phù hợp với doanh nghiệp vừa và nhỏ có nhu cầu mở rộng.
+- **Khả năng mở rộng:** Khi doanh nghiệp phát triển, Power BI vẫn đáp ứng tốt nhu cầu phân tích dữ liệu lớn, tích hợp với Azure và các dịch vụ đám mây khác.
+
+Google Data Studio là lựa chọn phù hợp cho các doanh nghiệp nhỏ, startup hoặc các nhóm marketing cần báo cáo nhanh, chi phí thấp, ưu tiên tích hợp với Google Cloud. Tuy nhiên, với nhu cầu phân tích phức tạp, đa nguồn và bảo mật cao, Power BI là lựa chọn tối ưu cho hệ thống Data Warehouse của dự án này.
 ## PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
 
 ### 3.1. Phân tích yêu cầu hệ thống
@@ -713,40 +964,7 @@ Việc giám sát chủ yếu được thực hiện thông qua giao diện ngư
 Cách tiếp cận này giúp đơn giản hóa việc quản lý và bảo trì hệ thống, tập trung vào các công cụ có sẵn mà không cần triển khai thêm các hệ thống giám sát phức tạp từ bên ngoài.
 
 ## KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
-### 6.1. Kết luận
-
-Luận văn đã thành công trong việc thiết kế và triển khai một hệ thống Data Warehouse hoàn chỉnh cho doanh nghiệp thương mại điện tử đa nền tảng, với những đóng góp và kết quả đáng chú ý sau:
-
-1. **Xây dựng được một kiến trúc ELT hiện đại và tự động hóa:** Hệ thống đã tận dụng sức mạnh của Apache Airflow để điều phối và tự động hóa toàn bộ quy trình từ trích xuất dữ liệu từ các nguồn khác nhau, tải vào hệ thống lưu trữ, đến biến đổi dữ liệu thành dạng phù hợp cho phân tích. Các DAG được thiết kế theo mô-đun và có thể tái sử dụng, giúp dễ dàng mở rộng cho các nguồn dữ liệu và loại dữ liệu mới.
-
-2. **Triển khai thành công kiến trúc lưu trữ đa lớp:** Với việc sử dụng MinIO làm kho lưu trữ đối tượng và tổ chức dữ liệu theo các lớp raw, staging, cleaned, hệ thống đã xây dựng được một nền tảng dữ liệu linh hoạt, có khả năng mở rộng và dễ quản lý. Định dạng Parquet được chọn lựa phù hợp cho việc lưu trữ và truy vấn hiệu quả.
-
-3. **Ứng dụng công nghệ xử lý dữ liệu tiên tiến:** Việc sử dụng DuckDB để truy vấn và xử lý dữ liệu trực tiếp từ MinIO đã tận dụng được ưu điểm của cả hai công nghệ, mang lại hiệu suất cao và chi phí thấp. Khả năng thực hiện các phép biến đổi phức tạp thông qua SQL đơn giản hóa quy trình phát triển và bảo trì hệ thống.
-
-4. **Trực quan hóa dữ liệu hiệu quả:** Các dashboard trong Power BI được thiết kế để cung cấp cái nhìn tổng quan và chi tiết về hoạt động kinh doanh, giúp các nhà quản lý đưa ra quyết định dựa trên dữ liệu một cách kịp thời và chính xác.
-
-Giá trị của hệ thống đối với doanh nghiệp là rất lớn, từ việc tiết kiệm thời gian và nguồn lực trong việc thu thập và xử lý dữ liệu, đến khả năng cung cấp thông tin kinh doanh quan trọng một cách nhanh chóng và chính xác. Điều này giúp doanh nghiệp có thể phản ứng nhanh với các thay đổi thị trường, tối ưu hóa chiến lược kinh doanh và nâng cao lợi thế cạnh tranh.
-
-### 6.2. Hướng phát triển trong tương lai
-
-Dựa trên nền tảng đã xây dựng, có nhiều hướng phát triển và cải tiến tiềm năng cho hệ thống trong tương lai:
-
-1. **Mở rộng nguồn dữ liệu và loại dữ liệu:**
-   - Tích hợp thêm các sàn thương mại điện tử mới hoặc kênh bán hàng khác như Sendo, Amazon, Facebook Marketplace.
-   - Bổ sung các loại dữ liệu mới như dữ liệu marketing, dữ liệu tương tác của khách hàng trên website và mạng xã hội.
-   - Tích hợp dữ liệu từ hệ thống CRM, ERP và các hệ thống nội bộ khác để có cái nhìn toàn diện hơn về hoạt động kinh doanh.
-
-2. **Cải tiến quy trình xử lý dữ liệu:**
-   - Triển khai cơ chế xử lý dữ liệu incrementally để giảm tải cho hệ thống khi lượng dữ liệu tăng lên.
-   - Thêm các kiểm tra chất lượng dữ liệu (data quality checks) tự động trong pipeline để phát hiện và xử lý các vấn đề về dữ liệu.
-   - Triển khai cơ chế lineage (theo dõi nguồn gốc dữ liệu) để dễ dàng kiểm soát và xử lý sự cố.
-   - Tối ưu hóa truy vấn và lưu trữ để cải thiện hiệu suất, đặc biệt với dữ liệu lớn.
-
-3. **Phân tích nâng cao và ứng dụng AI/ML:**
-   - Xây dựng các mô hình dự báo doanh thu, nhu cầu và tồn kho để hỗ trợ việc lên kế hoạch kinh doanh.
-   - Áp dụng kỹ thuật phân khúc khách hàng (customer segmentation) và RFM analysis để tối ưu hóa chiến lược tiếp thị.
-   - Phát triển hệ thống gợi ý sản phẩm dựa trên lịch sử mua hàng và hành vi của khách hàng.
-   - Triển khai phát hiện bất thường (anomaly detection) để kịp thời phát hiện các vấn đề như gian lận hoặc biến động bất thường trong doanh số.
+ gian lận hoặc biến động bất thường trong doanh số.
 
 4. **Nâng cấp hạ tầng và công nghệ:**
    - Chuyển từ MinIO sang các giải pháp lưu trữ đám mây như Amazon S3 hoặc Azure Blob Storage để có khả năng mở rộng tốt hơn.
