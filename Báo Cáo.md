@@ -391,6 +391,55 @@ Việc lựa chọn công cụ trực quan hóa dữ liệu phù hợp đóng va
 Power BI là bộ công cụ BI mạnh mẽ của Microsoft, hỗ trợ từ việc kết nối, xử lý, mô hình hóa đến trực quan hóa dữ liệu. Power BI nổi bật với khả năng tích hợp nhiều nguồn dữ liệu, xử lý dữ liệu lớn, hỗ trợ các phép tính phức tạp với DAX, và khả năng xây dựng dashboard tương tác chuyên sâu. Ngoài ra, Power BI còn hỗ trợ bảo mật dữ liệu ở mức dòng (Row Level Security), chia sẻ báo cáo linh hoạt qua Power BI Service, và tích hợp tốt với hệ sinh thái Microsoft (Azure, Office 365).
 
 **Ưu điểm:**
+
+- Xử lý và mô hình hóa dữ liệu mạnh mẽ, phù hợp cho phân tích chuyên sâu
+- Hỗ trợ nhiều nguồn dữ liệu, kể cả file Parquet, cơ sở dữ liệu lớn, API
+- Dashboard tương tác cao, nhiều loại biểu đồ, hỗ trợ custom visuals
+- Bảo mật và quản trị người dùng chi tiết, phù hợp doanh nghiệp lớn
+- Có thể xuất báo cáo ra PDF, PowerPoint, embed vào website hoặc ứng dụng
+
+**Nhược điểm:**
+
+- Một số tính năng nâng cao yêu cầu trả phí (Power BI Pro/Service)
+- Giao diện và thao tác có thể phức tạp với người mới
+- Tối ưu nhất khi dùng trong hệ sinh thái Microsoft
+
+##### 2. Google Data Studio (Looker Studio)
+
+Google Data Studio (nay là Looker Studio) là công cụ trực quan hóa dữ liệu miễn phí, chạy hoàn toàn trên nền web, tập trung vào sự đơn giản, dễ chia sẻ và tích hợp sâu với các dịch vụ Google như BigQuery, Google Sheets, Google Analytics.
+
+**Ưu điểm:**
+
+- Miễn phí, dễ sử dụng, giao diện trực quan, thao tác kéo thả
+- Tích hợp mạnh với Google Cloud, BigQuery, Sheets, Analytics
+- Chia sẻ báo cáo dễ dàng qua link, embed, xuất PDF
+- Phù hợp cho báo cáo nhanh, dashboard marketing, startup, doanh nghiệp nhỏ
+
+**Nhược điểm:**
+
+- Khả năng xử lý và mô hình hóa dữ liệu hạn chế, không phù hợp cho phân tích phức tạp
+- Hỗ trợ nguồn dữ liệu ngoài Google ecosystem còn hạn chế
+- Không có tính năng bảo mật nâng cao như RLS
+- Ít tính năng custom visuals hơn Power BI
+
+#### Lý do lựa chọn Power BI cho dự án
+
+Dự án lựa chọn Power BI vì các lý do sau:
+
+- **Tích hợp đa nguồn:** Kết nối tốt với file Parquet, DuckDB, MinIO, các cơ sở dữ liệu lớn và API.
+- **Khả năng phân tích mạnh:** Hỗ trợ DAX, Power Query, phù hợp cho các dashboard phân tích KPI, drill-down, phân tích đa chiều.
+- **Bảo mật và chia sẻ:** Hỗ trợ chia sẻ nội bộ, bảo mật dữ liệu, phù hợp với doanh nghiệp vừa và nhỏ có nhu cầu mở rộng.
+- **Khả năng mở rộng:** Khi doanh nghiệp phát triển, Power BI vẫn đáp ứng tốt nhu cầu phân tích dữ liệu lớn, tích hợp với Azure và các dịch vụ đám mây khác.
+
+Google Data Studio là lựa chọn phù hợp cho các doanh nghiệp nhỏ, startup hoặc các nhóm marketing cần báo cáo nhanh, chi phí thấp, ưu tiên tích hợp với Google Cloud. Tuy nhiên, với nhu cầu phân tích phức tạp, đa nguồn và bảo mật cao, Power BI là lựa chọn tối ưu cho hệ thống Data Warehouse của dự án này.
+
+#### Phân tích chi tiết
+
+##### 1. Power BI
+
+Power BI là bộ công cụ BI mạnh mẽ của Microsoft, hỗ trợ từ việc kết nối, xử lý, mô hình hóa đến trực quan hóa dữ liệu. Power BI nổi bật với khả năng tích hợp nhiều nguồn dữ liệu, xử lý dữ liệu lớn, hỗ trợ các phép tính phức tạp với DAX, và khả năng xây dựng dashboard tương tác chuyên sâu. Ngoài ra, Power BI còn hỗ trợ bảo mật dữ liệu ở mức dòng (Row Level Security), chia sẻ báo cáo linh hoạt qua Power BI Service, và tích hợp tốt với hệ sinh thái Microsoft (Azure, Office 365).
+
+**Ưu điểm:**
 - Xử lý và mô hình hóa dữ liệu mạnh mẽ, phù hợp cho phân tích chuyên sâu
 - Hỗ trợ nhiều nguồn dữ liệu, kể cả file Parquet, cơ sở dữ liệu lớn, API
 - Dashboard tương tác cao, nhiều loại biểu đồ, hỗ trợ custom visuals
@@ -764,6 +813,7 @@ let
     #"Lọc dữ liệu không hợp lệ" = Table.SelectRows(#"Kiểm tra tính hợp lệ", each [Valid] = true)
 in
     #"Lọc dữ liệu không hợp lệ"
+````
 Hệ thống đảm bảo chất lượng dữ liệu này giúp phát hiện sớm các vấn đề, tăng độ tin cậy của báo cáo và phân tích, đồng thời giảm thiểu rủi ro trong quá trình ra quyết định dựa trên dữ liệu.
 
 ### 4.3. Xây dựng Dashboard trực quan hóa
