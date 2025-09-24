@@ -90,6 +90,80 @@ Trong bối cảnh cạnh tranh gay gắt của thị trường thương mại �
 - **Ra quyết định chiến lược:** Phân tích dữ liệu giúp các nhà quản lý đưa ra các quyết định sáng suốt về mở rộng thị trường, phát triển sản phẩm mới, và cải thiện quy trình vận hành.
 
 ### 2.2. Các khái niệm về xử lý và trực quan hóa dữ liệu
+#### 2.2.1. So sánh giữa ETL và ELT
+
+Hai mô hình xử lý dữ liệu chính trong các hệ thống kho dữ liệu hiện đại là **ETL (Extract, Transform, Load)** và **ELT (Extract, Load, Transform)**. Sự khác biệt giữa hai mô hình này không chỉ là thứ tự các bước xử lý, mà còn là triết lý thiết kế và cách tiếp cận xử lý dữ liệu.
+
+##### Bảng so sánh đặc điểm chính
+
+| **Tiêu chí** | **ETL (Extract, Transform, Load)** | **ELT (Extract, Load, Transform)** |
+|--------------|-------------------------------------|-------------------------------------|
+| **Quy trình** | Dữ liệu được trích xuất, sau đó biến đổi trong một môi trường trung gian, cuối cùng mới tải vào kho dữ liệu | Dữ liệu được trích xuất và tải trực tiếp vào kho dữ liệu, sau đó mới thực hiện các biến đổi |
+| **Nơi xử lý dữ liệu** | Hệ thống trung gian tách biệt (ETL server) | Trực tiếp trong kho dữ liệu đích (Data warehouse) |
+| **Loại dữ liệu phù hợp** | Dữ liệu có cấu trúc, cần xử lý nghiêm ngặt trước khi tải | Dữ liệu đa dạng, bao gồm cả không cấu trúc và bán cấu trúc |
+| **Tốc độ nạp dữ liệu** | Chậm hơn (do xử lý trước khi tải) | Nhanh hơn (tải trực tiếp, xử lý sau) |
+| **Khả năng mở rộng** | Hạn chế bởi khả năng xử lý của máy chủ ETL | Cao hơn, tận dụng sức mạnh xử lý của kho dữ liệu |
+| **Chi phí triển khai** | Cao hơn (yêu cầu hạ tầng riêng cho xử lý ETL) | Thấp hơn (tận dụng hạ tầng của kho dữ liệu) |
+| **Độ phức tạp trong phát triển** | Phức tạp hơn, cần công cụ ETL chuyên dụng | Đơn giản hơn, sử dụng SQL và tính năng của kho dữ liệu |
+| **Khả năng thích ứng với thay đổi** | Kém linh hoạt hơn, cần điều chỉnh quy trình ETL | Linh hoạt hơn, có thể dễ dàng thay đổi các phép biến đổi |
+| **Công nghệ phổ biến** | Informatica, SSIS, Talend, IBM DataStage | Snowflake, Redshift, BigQuery, DuckDB |
+| **Tính lịch sử của dữ liệu** | Thường chỉ lưu kết quả cuối, mất dữ liệu gốc | Có thể lưu cả dữ liệu thô và dữ liệu đã biến đổi |
+| **Môi trường phù hợp** | Môi trường truyền thống, yêu cầu nghiêm ngặt về chất lượng dữ liệu | Kho dữ liệu hiện đại, cloud-native, dữ liệu lớn |
+
+##### Phân tích chi tiết
+
+**1. ETL (Extract, Transform, Load)**
+
+ETL là mô hình truyền thống trong xử lý dữ liệu, nơi dữ liệu được lấy từ các nguồn, biến đổi trong một môi trường riêng biệt, sau đó mới tải vào kho dữ liệu.
+
+**Ưu điểm:**
+- Dữ liệu đã được làm sạch và biến đổi trước khi tải vào kho dữ liệu, đảm bảo chất lượng
+- Giảm không gian lưu trữ trong kho dữ liệu (chỉ lưu dữ liệu có giá trị)
+- Phù hợp với các hệ thống kho dữ liệu truyền thống không có khả năng xử lý dữ liệu mạnh
+- Kiểm soát tốt quy trình biến đổi dữ liệu
+
+**Nhược điểm:**
+- Cần thêm hạ tầng và công cụ riêng cho quá trình biến đổi
+- Khó mở rộng khi khối lượng dữ liệu tăng nhanh
+- Mất đi dữ liệu gốc sau khi biến đổi, gây khó khăn cho việc khôi phục hoặc phân tích sau này
+- Thời gian phát triển và triển khai lâu hơn
+
+**2. ELT (Extract, Load, Transform)**
+
+ELT là mô hình hiện đại, phổ biến trong các kho dữ liệu hiện đại, nơi dữ liệu được trích xuất và tải trực tiếp vào kho dữ liệu, sau đó mới thực hiện các biến đổi.
+
+**Ưu điểm:**
+- Quá trình nạp dữ liệu nhanh hơn (tải dữ liệu thô trực tiếp)
+- Tận dụng được sức mạnh xử lý của các kho dữ liệu hiện đại
+- Lưu giữ dữ liệu gốc, tạo điều kiện cho việc phân tích và truy xuất sau này
+- Linh hoạt trong việc thay đổi logic biến đổi mà không cần chạy lại toàn bộ quy trình
+- Phù hợp với kỷ nguyên dữ liệu lớn và đa dạng
+
+**Nhược điểm:**
+- Yêu cầu kho dữ liệu có khả năng xử lý mạnh
+- Chi phí lưu trữ cao hơn (lưu cả dữ liệu thô và dữ liệu đã xử lý)
+- Có thể gặp khó khăn trong quản lý chất lượng dữ liệu nếu không có quy trình rõ ràng
+- Phụ thuộc vào khả năng xử lý SQL của kho dữ liệu
+
+##### Lý do lựa chọn ELT cho dự án
+
+Dự án này đã triển khai mô hình ELT bằng Apache Airflow và DuckDB vì những lý do sau:
+
+1. **Tính linh hoạt cao:** Cho phép lưu trữ dữ liệu thô từ nhiều nguồn khác nhau (các sàn TMĐT) trong MinIO trước khi thực hiện các phép biến đổi, tạo điều kiện cho việc thay đổi logic xử lý mà không cần trích xuất lại dữ liệu.
+
+2. **Khả năng xử lý đa dạng nguồn dữ liệu:** Mô hình ELT phù hợp với dự án này khi phải xử lý dữ liệu từ nhiều nguồn với cấu trúc khác nhau (Shopee, Lazada, Tiki, Tiktok Shop).
+
+3. **Tận dụng sức mạnh của DuckDB:** DuckDB có khả năng xử lý dữ liệu Parquet hiệu quả, cho phép thực hiện các phép biến đổi phức tạp trực tiếp trên dữ liệu lưu trong MinIO.
+
+4. **Chi phí triển khai thấp:** Không cần thêm hạ tầng riêng cho xử lý ETL, tất cả được thực hiện trong cùng một kiến trúc với MinIO và DuckDB.
+
+5. **Khả năng tái sử dụng và phân tích lịch sử:** Việc lưu trữ dữ liệu thô cho phép tái xử lý khi cần thiết và thực hiện các phân tích trên dữ liệu lịch sử.
+
+6. **Cấu trúc đa tầng rõ ràng:** Mô hình ELT triển khai trong dự án với các tầng raw, staging, cleaned giúp quản lý quy trình xử lý dữ liệu một cách có tổ chức và minh bạch.
+
+Tóm lại, ELT là sự lựa chọn phù hợp cho các dự án kho dữ liệu hiện đại có nhu cầu xử lý dữ liệu đa dạng, linh hoạt và có khả năng mở rộng, đặc biệt là các dự án sử dụng công nghệ lưu trữ và xử lý dữ liệu hiện đại như MinIO và DuckDB.
+
+#### 2.2.2. Data Pipeline và trực quan hóa dữ liệu
 
 Data Pipeline là một chuỗi các bước tự động được thiết kế để di chuyển và xử lý dữ liệu từ các nguồn khác nhau đến một điểm đích (thường là Data Warehouse) để phục vụ cho việc phân tích. Luận văn này đã triển khai mô hình ELT (Extract, Load, Transform) bằng Apache Airflow, một phương pháp xử lý dữ liệu hiện đại, trong đó:
 
