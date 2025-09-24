@@ -1088,18 +1088,62 @@ Việc giám sát chủ yếu được thực hiện thông qua giao diện ngư
 Cách tiếp cận này giúp đơn giản hóa việc quản lý và bảo trì hệ thống, tập trung vào các công cụ có sẵn mà không cần triển khai thêm các hệ thống giám sát phức tạp từ bên ngoài.
 
 ## KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
- gian lận hoặc biến động bất thường trong doanh số.
 
-4. **Nâng cấp hạ tầng và công nghệ:**
-   - Chuyển từ MinIO sang các giải pháp lưu trữ đám mây như Amazon S3 hoặc Azure Blob Storage để có khả năng mở rộng tốt hơn.
-   - Đánh giá và áp dụng các công nghệ mới như Apache Iceberg hoặc Delta Lake để cải thiện quản lý dữ liệu.
-   - Tích hợp công cụ dbt (data build tool) để quản lý và tài liệu hóa các phép biến đổi dữ liệu một cách hiệu quả.
-   - Nâng cấp hạ tầng để hỗ trợ xử lý dữ liệu thời gian thực (real-time processing) thay vì chỉ xử lý theo lô (batch processing).
+### 5.1 Kết luận
 
-5. **Cải thiện trải nghiệm người dùng:**
-   - Phát triển giao diện self-service để người dùng có thể tự tạo báo cáo và truy vấn dữ liệu mà không cần kiến thức kỹ thuật chuyên sâu.
-   - Thêm các tính năng cảnh báo tự động khi có biến động bất thường trong các chỉ số kinh doanh.
-   - Xây dựng các dashboard chuyên sâu hơn cho các phòng ban khác nhau (marketing, vận hành, tài chính, v.v.).
+**Tóm tắt kết quả đạt được:**
+
+- Đã thiết kế và triển khai thành công một hệ thống kho dữ liệu hiện đại cho việc phân tích dữ liệu bán hàng đa nền tảng, tích hợp dữ liệu từ nhiều sàn thương mại điện tử (Shopee, Lazada, Tiki, Tiktok Shop) và website riêng của doanh nghiệp.
+- Xây dựng thành công kiến trúc ELT hoàn chỉnh với các tầng dữ liệu raw, staging và cleaned, giúp duy trì tính toàn vẹn và truy xuất nguồn gốc dữ liệu.
+- Triển khai các pipeline tự động bằng Apache Airflow, xử lý dữ liệu với DuckDB, và lưu trữ hiệu quả trong MinIO với định dạng Parquet.
+- Phát triển các dashboard trực quan trong Power BI, cung cấp cái nhìn tổng quan về hiệu suất kinh doanh của doanh nghiệp.
+
+**Lợi ích của giải pháp:**
+
+- **Tự động hóa:** Giảm thiểu thời gian và công sức cho việc tổng hợp dữ liệu từ các nguồn khác nhau, thay thế quy trình thủ công bằng pipeline tự động.
+- **Tính nhất quán:** Đảm bảo dữ liệu được xử lý và trình bày một cách nhất quán, độ tin cậy cao thông qua các quy trình kiểm soát chất lượng dữ liệu.
+- **Chi phí hiệu quả:** Sử dụng công nghệ mã nguồn mở (Airflow, DuckDB, MinIO) giúp tiết kiệm chi phí đáng kể so với các giải pháp thương mại.
+- **Khả năng mở rộng:** Thiết kế theo kiến trúc module, cho phép dễ dàng tích hợp thêm nguồn dữ liệu mới hoặc thay đổi công nghệ trong từng thành phần.
+
+**Thách thức và giải pháp:**
+
+- **Đa dạng nguồn dữ liệu:** Mỗi sàn TMĐT có cấu trúc dữ liệu khác nhau, đã giải quyết thông qua các bước chuẩn hóa dữ liệu và thiết kế mô hình chiều.
+- **Đảm bảo chất lượng dữ liệu:** Triển khai các cơ chế kiểm tra và xác thực tại nhiều tầng, từ raw data đến cleaned data và trong Power Query.
+- **Hiệu suất xử lý:** Tối ưu hóa quy trình ELT với việc sử dụng định dạng Parquet, kỹ thuật phân vùng dữ liệu, và tận dụng sức mạnh xử lý của DuckDB.
+- **Triển khai đơn giản:** Sử dụng Docker giúp đơn giản hóa quá trình triển khai và bảo trì hệ thống.
+
+### 5.2 Hướng phát triển
+
+**Mở rộng nguồn dữ liệu:**
+
+- Tích hợp thêm dữ liệu từ các sàn thương mại điện tử khác và các kênh bán hàng truyền thống.
+- Bổ sung dữ liệu từ các hệ thống CRM, ERP, và các ứng dụng nội bộ khác để có cái nhìn toàn diện hơn về hoạt động kinh doanh.
+- Tích hợp dữ liệu mạng xã hội và dữ liệu marketing để phân tích hiệu quả của các chiến dịch quảng cáo.
+
+**Nâng cao phân tích dữ liệu:**
+
+- Nghiên cứu sâu hơn về các nghiệp vụ kinh doanh để xác định nhu cầu phân tích thực tế của từng phòng ban.
+- Xây dựng thêm nhiều dashboard chuyên biệt phục vụ các mục tiêu quản trị, vận hành, marketing, tài chính, v.v.
+- Tối ưu hóa giao diện và chức năng dashboard để đáp ứng tốt hơn nhu cầu khai thác dữ liệu của người dùng cuối.
+
+**Tự động hóa và tích hợp thông minh:**
+
+- Phát triển hệ thống cảnh báo tự động dựa trên ngưỡng KPI định trước.
+- Tích hợp các công cụ quản lý metadata và data lineage để theo dõi nguồn gốc và sự biến đổi của dữ liệu.
+- Xây dựng các quy trình tự động cho việc kiểm tra chất lượng dữ liệu, bao gồm giám sát độ trễ, tính đầy đủ và tính chính xác.
+
+**Nâng cấp hệ thống lên kiến trúc data lakehouse:**
+
+- Chuyển đổi hệ thống từ mô hình data warehouse truyền thống sang kiến trúc data lakehouse hiện đại, kết hợp ưu điểm của data lake và data warehouse.
+- Triển khai các giải pháp lưu trữ và quản lý dữ liệu như Apache Iceberg, Delta Lake để hỗ trợ versioning, ACID và quản lý metadata tốt hơn.
+- Tích hợp các công cụ như dbt (data build tool) để quản lý, kiểm soát và tài liệu hóa các phép biến đổi dữ liệu một cách hiệu quả trên nền tảng lakehouse.
+- Mở rộng khả năng xử lý dữ liệu thời gian thực (real-time processing) và batch trên cùng một nền tảng, phục vụ đa dạng nhu cầu phân tích và khai thác dữ liệu.
+
+**Cải thiện trải nghiệm người dùng:**
+
+- Phát triển giao diện self-service để người dùng có thể tự tạo báo cáo và truy vấn dữ liệu mà không cần kiến thức kỹ thuật chuyên sâu.
+- Thêm các tính năng cảnh báo tự động khi có biến động bất thường trong các chỉ số kinh doanh.
+- Xây dựng các dashboard chuyên sâu hơn cho các phòng ban khác nhau (marketing, vận hành, tài chính, v.v.).
 
 Với khả năng mở rộng và tính linh hoạt của kiến trúc hiện tại, giải pháp này có tiềm năng áp dụng rộng rãi không chỉ cho các doanh nghiệp thương mại điện tử mà còn cho nhiều lĩnh vực kinh doanh khác có nhu cầu tích hợp và phân tích dữ liệu từ nhiều nguồn khác nhau.
 
