@@ -31,8 +31,11 @@ def extract_order(
                 SELECT COUNT(*)
                 FROM orders
                 WHERE DATE(order_date) = DATE(:created_at)
+                AND orders.order_channel_id = (SELECT id FROM order_channel WHERE LOWER(name) = LOWER(:order_channel))
             """
-            existing_orders_count = conn.execute(text(check_query), {"created_at": created_at_dt}).scalar()
+            existing_orders_count = conn.execute(text(check_query), {"created_at": created_at_dt, "order_channel": order_channel}).scalar()
+
+            print(f"Số đơn hàng hiện có trong ngày {created_at}: {existing_orders_count}")
 
             # Nếu đã có đơn hàng, không cần tạo thêm
             if existing_orders_count > 0:
@@ -41,6 +44,7 @@ def extract_order(
             else:
                 # Gọi hàm create_multiple_orders để tạo đơn hàng
                 num_orders = random.randint(1, 100)
+                print(f"Tạo mới {num_orders} đơn hàng cho ngày {created_at}")
                 created_orders = create_multiple_orders(num_orders=num_orders, order_date=created_at_dt)
                 created_count = len(created_orders) if created_orders else num_orders
 
@@ -75,6 +79,8 @@ def extract_order(
 
             # Thực thi truy vấn
             result = conn.execute(text(query), params)
+            # in ra result
+            print(f"Số dòng truy vấn được: {result.rowcount}")
 
             # Chuyển kết quả thành danh sách các từ điển và cố tình tạo ra dữ liệu "bẩn"
             orders = []

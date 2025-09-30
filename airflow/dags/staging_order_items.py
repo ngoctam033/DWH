@@ -13,13 +13,6 @@ from datetime import datetime, timedelta
 from io import BytesIO
 import os
 
-# Import datasets từ DAG extract_user
-from extract_user import (
-    SHOPEE_USER_DATASET, TIKTOK_USER_DATASET, 
-    TIKI_USER_DATASET, WEBSITE_USER_DATASET,
-    LAZADA_USER_DATASET
-)
-
 # Import thư viện kết nối MinIO
 from config.minio_config import (
     get_object_name, download_json_from_minio, list_files_in_minio_dir

@@ -1,34 +1,35 @@
 """
-Cấu hình kết nối đến PostgreSQL database
+PostgreSQL database connection configuration
 """
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 
-# Thông tin kết nối database
+# Database connection information
 DB_CONFIG = {
     'host': 'db',
-    'port': '5432',  # Cổng ngoài của container Postgres được ánh xạ ra máy host
+    'port': '5432',  # The external port of the Postgres container mapped to the host
     'user': 'final_project',
     'password': 'final_project',
     'database': 'final_project'
 }
 
-# Tạo URL kết nối
+# Create connection URL
 DATABASE_URL = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}"
 
-# Sử dụng hàm này để lấy URL kết nối
+
+# Use this function to get the connection URL
 def get_database_url():
-    """Trả về URL kết nối database"""
+    """Return the database connection URL"""
     return DATABASE_URL
 
 def get_db_connection():
     """
-    Tạo kết nối đến PostgreSQL database
+    Create a connection to the PostgreSQL database
     Returns:
         SQLAlchemy engine object
     Raises:
-        SQLAlchemyError: Nếu không thể tạo kết nối
+        SQLAlchemyError: If the connection cannot be established
     """
     try:
         engine = create_engine(DATABASE_URL)
@@ -37,5 +38,5 @@ def get_db_connection():
             connection.execute("SELECT 1")
         return engine
     except SQLAlchemyError as e:
-        logging.error(f"Không thể kết nối đến database: {str(e)}")
+        logging.error(f"Cannot connect to database: {str(e)}")
         raise
