@@ -7,7 +7,7 @@ Hệ thống này được thiết kế để giải quyết các vấn đề v�
 
 ## **Kiến trúc tổng thể**
 
-### **Hình ảnh minh họa hệ thống**
+### **Hình ảnh minh họa Dashboard**
 ![Sale Dashboard](Sale%20Dashboard.png)
 
 ### **1. Tổng quan kiến trúc**
