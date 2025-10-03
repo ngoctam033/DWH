@@ -7,6 +7,9 @@ Hệ thống này được thiết kế để giải quyết các vấn đề v�
 
 ## **Kiến trúc tổng thể**
 
+### **Hình ảnh minh họa hệ thống**
+![Sale Dashboard](Sale%20Dashboard.png)
+
 ### **1. Tổng quan kiến trúc**
 - **Mô hình ELT (Extract - Load - Transform)**: Hệ thống được xây dựng theo kiến trúc ELT hiện đại.
 - **Mô hình phân lớp**: Dữ liệu được tổ chức theo các lớp `Raw` → `Staging` → `Cleaned`.
