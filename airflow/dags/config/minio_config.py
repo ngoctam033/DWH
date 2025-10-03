@@ -1,6 +1,6 @@
 """
-Cấu hình kết nối MinIO cho các DAG của Airflow.
-Module này cung cấp các hàm tiện ích để kết nối và tương tác với MinIO.
+MinIO connection configuration for Airflow DAGs.
+This module provides utility functions to connect and interact with MinIO.
 """
 import logging
 import io
@@ -8,18 +8,18 @@ from datetime import datetime
 from minio import Minio
 import json
 
-# Thông tin kết nối MinIO
-MINIO_ENDPOINT = "minio1"  # Sử dụng tên service trong docker-compose
+# MinIO connection information
+MINIO_ENDPOINT = "minio1"  # Use service name in docker-compose
 MINIO_PORT = 9000
 MINIO_ACCESS_KEY = "admin"
 MINIO_SECRET_KEY = "admin123"
-MINIO_SECURE = False  # Sử dụng HTTP thay vì HTTPS
+MINIO_SECURE = False  # Use HTTP instead of HTTPS
 
-# Thông tin về bucket
+# Bucket information
 DEFAULT_BUCKET = "datawarehouse"
 JSON_FOLDER = "json-data"
 
-# Cấu hình định dạng tên file
+# File name format configuration
 # FILE_NAME_FORMAT = "{dag_id}/{logical_date}_{task_id}.json"
 
 FOLDER_STRUCTURE = {
@@ -37,23 +37,23 @@ FOLDER_STRUCTURE = {
 
 def upload_file_to_minio(file_bytes, object_name, bucket_name=DEFAULT_BUCKET, content_type="application/octet-stream"):
     """
-    Upload file bytes (Parquet, CSV, v.v.) lên MinIO
+    Upload file bytes (Parquet, CSV, etc.) to MinIO
     
     Parameters:
     -----------
     file_bytes : bytes
-        Dữ liệu file dạng bytes (ví dụ: từ buffer.getvalue().to_pybytes())
+        File data in bytes (e.g., from buffer.getvalue().to_pybytes())
     object_name : str
-        Tên đối tượng trên MinIO (đường dẫn đầy đủ)
+        Object name on MinIO (full path)
     bucket_name : str, optional
-        Tên bucket, mặc định là bucket được cấu hình trong module
+        Bucket name, default is the bucket configured in the module
     content_type : str, optional
-        Loại nội dung file, mặc định là "application/octet-stream"
+        File content type, default is "application/octet-stream"
     
     Returns:
     --------
     str
-        Đường dẫn đầy đủ của đối tượng đã upload theo định dạng s3://{bucket}/{object}
+        Full path of the uploaded object in the format s3://{bucket}/{object}
     """
     try:
         file_buffer = io.BytesIO(file_bytes)
@@ -66,23 +66,23 @@ def upload_file_to_minio(file_bytes, object_name, bucket_name=DEFAULT_BUCKET, co
             length=file_length,
             content_type=content_type
         )
-        logging.info(f"Đã upload thành công file lên MinIO: s3://{bucket_name}/{object_name}")
+        logging.info(f"Successfully uploaded file to MinIO: s3://{bucket_name}/{object_name}")
         return f"s3://{bucket_name}/{object_name}"
     except Exception as e:
-        logging.error(f"Lỗi khi upload file lên MinIO: {e}")
+        logging.error(f"Error uploading file to MinIO: {e}")
         raise
 
 def get_minio_client():
     """
-    Tạo và trả về một kết nối client đến MinIO server.
+    Create and return a client connection to the MinIO server.
     
     Returns:
     --------
     minio.Minio
-        Instance của Minio client đã được kết nối
+        Instance of connected Minio client
     """
     try:        
-        # Tạo client MinIO
+        # Create MinIO client
         client = Minio(
             f"{MINIO_ENDPOINT}:{MINIO_PORT}",
             access_key=MINIO_ACCESS_KEY,
@@ -92,70 +92,70 @@ def get_minio_client():
         
         return client
     except Exception as e:
-        logging.error(f"Lỗi khi tạo kết nối MinIO: {e}")
+        logging.error(f"Error creating MinIO connection: {e}")
         raise
 
 def get_object_name(layer, channel, data_model, logical_date, task_id=None, file_type="json"):
     """
-    Tạo tên file chuẩn cho đối tượng trong MinIO theo cấu trúc phân vùng (partition)
-    Lưu ý: Ngày trong đường dẫn sẽ là ngày chạy DAG - 1 ngày (hôm qua)
+    Generate a standard file name for the object in MinIO according to partition structure.
+    Note: The date in the path will be DAG run date - 1 day (yesterday)
     
     Parameters:
     -----------
     layer : str
-        Tầng dữ liệu (raw, staging, cleaned, aggregated)
+        Data layer (raw, staging, cleaned, aggregated)
     channel : str
-        Tên của kênh (shopee, lazada, tiki, website, erp)
+        Channel name (shopee, lazada, tiki, website, erp)
     data_model : str
-        Loại dữ liệu (orders, users, products, v.v.)
-    logical_date : datetime hoặc str
-        Ngày thực thi của DAG, có thể là đối tượng datetime hoặc chuỗi định dạng YYYY-MM-DD
+        Data type (orders, users, products, etc.)
+    logical_date : datetime or str
+        DAG execution date, can be a datetime object or string in YYYY-MM-DD format
     task_id : str, optional
-        ID của task, mặc định là None
+        Task ID, default is None
     file_type : str, optional
-        Loại file, mặc định là "json"
+        File type, default is "json"
         
     Returns:
     --------
     str
-        Tên đầy đủ của đối tượng trong MinIO theo cấu trúc phân vùng
+        Full object name in MinIO according to partition structure
     """
     from datetime import datetime, timedelta
     
-    # Chuyển đổi logical_date thành datetime và tính ngày hôm qua
+    # Convert logical_date to datetime and get yesterday
     if hasattr(logical_date, 'strftime'):
-        # Nếu logical_date đã là datetime object
+        # If logical_date is already a datetime object
         yesterday = logical_date - timedelta(days=1)
     else:
-        # Nếu logical_date là chuỗi 'YYYY-MM-DD', chuyển thành datetime rồi trừ 1 ngày
+        # If logical_date is a string 'YYYY-MM-DD', convert to datetime then subtract 1 day
         try:
             exec_date = datetime.strptime(logical_date, '%Y-%m-%d')
             yesterday = exec_date - timedelta(days=1)
         except ValueError:
-            # Xử lý trường hợp format không đúng
-            raise ValueError(f"Định dạng ngày không hợp lệ: {logical_date}. Phải có định dạng 'YYYY-MM-DD'")
+            # Handle invalid format
+            raise ValueError(f"Invalid date format: {logical_date}. Must be in 'YYYY-MM-DD' format")
     
-    # Lấy các thành phần của yesterday
+    # Get components of yesterday
     year = yesterday.strftime('%Y')
     month = yesterday.strftime('%m')
     day = yesterday.strftime('%d')
     date_str = yesterday.strftime('%Y-%m-%d')
     
-    # Tạo tên file
+    # Create file name
     file_name = f"{date_str}_data.{file_type}"
 
-    # Tạo đường dẫn đầy đủ theo cấu trúc thư mục phân vùng
-    object_path = f"layer={layer}/data_model={data_model}/channel={channel}/year={year}/month={month}/day={day}/{file_name}"
+    # Create full path according to partitioned folder structure
+    object_path = f"layer={layer}/year={year}/month={month}/day={day}/channel={channel}/data_model={data_model}/{file_name}"
     
-    # Log đường dẫn trả về
-    logging.info(f"Đường dẫn đối tượng trong MinIO: {object_path}")
+    # Log returned path
+    logging.info(f"Object path in MinIO: {object_path}")
 
     return object_path
 
 def list_files_in_minio_dir(object_dir):
     client = get_minio_client()
     bucket_name=DEFAULT_BUCKET
-    # object_dir phải kết thúc bằng dấu "/"
+    # object_dir must end with "/"
     if not object_dir.endswith('/'):
         object_dir += '/'
     objects = client.list_objects(bucket_name, prefix=object_dir, recursive=True)
@@ -164,37 +164,37 @@ def list_files_in_minio_dir(object_dir):
 
 def upload_json_to_minio(json_data, object_name, bucket_name=DEFAULT_BUCKET):
     """
-    Upload dữ liệu JSON lên MinIO. Nếu object_name đã tồn tại thì tự động thêm hậu tố để tránh ghi đè.
+    Upload JSON data to MinIO. If object_name already exists, automatically add a suffix to avoid overwriting.
     
     Parameters:
     -----------
-    json_data : dict hoặc list
-        Dữ liệu JSON cần upload
+    json_data : dict or list
+        JSON data to upload
     object_name : str
-        Tên đối tượng trên MinIO (đường dẫn đầy đủ)
+        Object name on MinIO (full path)
     bucket_name : str, optional
-        Tên bucket, mặc định là bucket được cấu hình trong module
+        Bucket name, default is the bucket configured in the module
         
     Returns:
     --------
     str
-        Đường dẫn đầy đủ của đối tượng đã upload theo định dạng s3://{bucket}/{object}
+        Full path of the uploaded object in the format s3://{bucket}/{object}
     """
     try:
-        # Chuyển đổi dữ liệu JSON thành bytes
+        # Convert JSON data to bytes
         json_bytes = json.dumps(json_data, indent=2).encode('utf-8')
         json_buffer = io.BytesIO(json_bytes)
         json_buffer_length = len(json_bytes)
         
         client = get_minio_client()
 
-        # Kiểm tra object đã tồn tại chưa, nếu có thì thêm hậu tố _1, _2, ...
+        # Check if object exists, if so add suffix _1, _2, ...
         base_name = object_name
         suffix = 1
         while True:
             try:
                 client.stat_object(bucket_name, object_name)
-                # Nếu không lỗi, tức là object đã tồn tại
+                # If no error, object exists
                 dot_idx = base_name.rfind('.')
                 if dot_idx != -1:
                     object_name = f"{base_name[:dot_idx]}_{suffix}{base_name[dot_idx:]}"
@@ -202,7 +202,7 @@ def upload_json_to_minio(json_data, object_name, bucket_name=DEFAULT_BUCKET):
                     object_name = f"{base_name}_{suffix}"
                 suffix += 1
             except Exception:
-                # Nếu lỗi (object chưa tồn tại) thì break
+                # If error (object does not exist), break
                 break
 
         # Upload file
@@ -214,68 +214,68 @@ def upload_json_to_minio(json_data, object_name, bucket_name=DEFAULT_BUCKET):
             content_type="application/json"
         )
         
-        logging.info(f"Đã upload thành công dữ liệu JSON lên MinIO: s3://{bucket_name}/{object_name}")
+        logging.info(f"Successfully uploaded JSON data to MinIO: s3://{bucket_name}/{object_name}")
         return f"s3://{bucket_name}/{object_name}"
     except Exception as e:
-        logging.error(f"Lỗi khi upload dữ liệu JSON lên MinIO: {e}")
+        logging.error(f"Error uploading JSON data to MinIO: {e}")
         raise
 
 def download_json_from_minio(object_name, bucket_name=DEFAULT_BUCKET):
     """
-    Download và trả về dữ liệu JSON từ MinIO
+    Download and return JSON data from MinIO
     
     Parameters:
     -----------
     object_name : str
-        Tên đối tượng trên MinIO (đường dẫn đầy đủ)
+        Object name on MinIO (full path)
     bucket_name : str, optional
-        Tên bucket, mặc định là bucket được cấu hình trong module
+        Bucket name, default is the bucket configured in the module
         
     Returns:
     --------
-    dict hoặc list
-        Dữ liệu JSON đã được parse từ file
+    dict or list
+        JSON data parsed from file
     """
     
-    # Log thông tin chi tiết trước khi download
-    logging.info(f"Chuẩn bị download file từ MinIO với:")
+    # Log detailed information before download
+    logging.info(f"Preparing to download file from MinIO with:")
     logging.info(f"  - bucket_name: '{bucket_name}'")
     logging.info(f"  - object_name: '{object_name}'")
-    logging.info(f"  - đường dẫn đầy đủ: s3://{bucket_name}/{object_name}")
+    logging.info(f"  - full path: s3://{bucket_name}/{object_name}")
     
     try:
-        # Kết nối đến MinIO và download file
+        # Connect to MinIO and download file
         client = get_minio_client()
         
-        # Log thêm thông tin về endpoint MinIO
+        # Log more information about MinIO endpoint
         logging.info(f"  - MinIO endpoint: {MINIO_ENDPOINT}:{MINIO_PORT}")
         
-        # Kiểm tra bucket tồn tại không
+        # Check if bucket exists
         bucket_exists = client.bucket_exists(bucket_name)
-        logging.info(f"  - Bucket '{bucket_name}' tồn tại: {bucket_exists}")
+        logging.info(f"  - Bucket '{bucket_name}' exists: {bucket_exists}")
         
-        # Thử kiểm tra object có tồn tại không
+        # Try to check if object exists
         try:
             stat = client.stat_object(bucket_name, object_name)
-            logging.info(f"  - Object tồn tại, kích thước: {stat.size} bytes")
+            logging.info(f"  - Object exists, size: {stat.size} bytes")
         except Exception as stat_error:
-            logging.warning(f"  - Không thể kiểm tra object: {stat_error}")
+            logging.warning(f"  - Cannot check object: {stat_error}")
         
         response = client.get_object(
             bucket_name=bucket_name,
             object_name=object_name
         )
         
-        # Đọc và parse dữ liệu JSON
+        # Read and parse JSON data
         content_bytes = response.read()
-        logging.info(f"  - Đã đọc {len(content_bytes)} bytes từ object")
+        logging.info(f"  - Read {len(content_bytes)} bytes from object")
         
         json_data = json.loads(content_bytes.decode('utf-8'))
         response.close()
         
-        logging.info(f"Đã download thành công dữ liệu JSON từ MinIO: s3://{bucket_name}/{object_name}")
+        logging.info(f"Successfully downloaded JSON data from MinIO: s3://{bucket_name}/{object_name}")
         return json_data
     except Exception as e:
-        logging.error(f"Lỗi khi download dữ liệu JSON từ MinIO: {e}")
-        logging.error(f"Chi tiết: bucket_name={bucket_name}, object_name={object_name}")
+        logging.error(f"Error downloading JSON data from MinIO: {e}")
+        logging.error(f"Details: bucket_name={bucket_name}, object_name={object_name}")
         raise

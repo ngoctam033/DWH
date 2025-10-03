@@ -63,7 +63,7 @@ def save_payment(**context):
         bucket_name = params.get('bucket_name', DEFAULT_BUCKET)
         
         # Tạo object name
-        object_name = f"layer=cleaned/data_model=payment/channel=erp/year={logical_date.year}/month={logical_date.month:02d}/day={logical_date.day:02d}/{logical_date.strftime('%Y-%m-%d')}_data.parquet"
+        object_name = f"layer=cleaned/year={logical_date.year}/month={logical_date.month:02d}/day={logical_date.day:02d}/channel=erp/data_model=payment/{logical_date.strftime('%Y-%m-%d')}_data.parquet"
 
         # Upload lên MinIO
         client = get_minio_client()
