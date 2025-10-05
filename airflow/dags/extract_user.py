@@ -81,42 +81,7 @@ def fetch_json_from_api(**context):
         logger.error("Lỗi khi gọi API: %s", str(e))
         raise
 
-# Task 2: Xử lý phần tử đầu tiên từ JSON
-def process_first_element(**context):
-    logger = logging.getLogger("airflow.task")
-    first_element = context['ti'].xcom_pull(key='first_element', task_ids='fetch_json_from_api')  # Giữ task_id cũ để đảm bảo tương thích với dữ liệu cũ
-    
-    if not first_element:
-        logger.error("Không tìm thấy phần tử đầu tiên trong XCom")
-        raise ValueError("Không tìm thấy phần tử đầu tiên trong XCom")
-    
-    # Lấy các key của phần tử đầu tiên
-    keys = list(first_element.keys())
-    logger.info(f"Các thuộc tính của phần tử đầu tiên: {keys}")
-    
-    # Lưu lại keys để sử dụng sau
-    context['ti'].xcom_push(key='json_keys', value=keys)
-    return keys
-
-# Task 3: Log chi tiết của phần tử đầu tiên
-def log_first_element_details(**context):
-    logger = logging.getLogger("airflow.task")
-    first_element = context['ti'].xcom_pull(key='first_element', task_ids='fetch_json_from_api')  # Giữ task_id cũ để đảm bảo tương thích với dữ liệu cũ
-    
-    if not first_element:
-        logger.error("Không tìm thấy phần tử đầu tiên trong XCom")
-        raise ValueError("Không tìm thấy phần tử đầu tiên trong XCom")
-    
-    # In chi tiết từng trường trong phần tử đầu tiên
-    logger.info("Chi tiết phần tử JSON đầu tiên:")
-    for key, value in first_element.items():
-        logger.info(f"  {key}: {value}")
-        
-    return first_element
-
-# Hàm tạo kết nối MinIO được định nghĩa trong minio_config.py
-
-# Task 4: Lưu dữ liệu JSON lên MinIO theo cấu trúc thư mục định sẵn
+# Task 2: Lưu dữ liệu JSON lên MinIO theo cấu trúc thư mục định sẵn
 def save_raw_json_to_minio(**context):
     logger = logging.getLogger("airflow.task")
     
@@ -209,7 +174,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[SHOPEE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
+        ##outlets=[SHOPEE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
     )
     
     # Task 3: Trigger DAG transform_shopee_user_to_parquet
@@ -219,7 +184,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -254,7 +219,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[TIKTOK_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset TikTok
+        ##outlets=[TIKTOK_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset TikTok
     )
     
     # Task 3: Trigger DAG transform_tiktok_user_to_parquet
@@ -264,7 +229,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -299,7 +264,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[TIKI_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
+        ##outlets=[TIKI_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
     )
 
     # Task 3: Trigger DAG transform_tiki_user_to_parquet
@@ -309,7 +274,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -344,7 +309,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[WEBSITE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
+        ##outlets=[WEBSITE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
     )
     
     # Task 3: Trigger DAG transform_website_user_to_parquet
@@ -354,7 +319,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -389,7 +354,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
+        ##outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
     )
 
     # Task 3: Trigger DAG transform_lazada_user_to_parquet
@@ -399,7 +364,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi

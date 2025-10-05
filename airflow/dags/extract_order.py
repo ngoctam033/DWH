@@ -15,11 +15,11 @@ from config.minio_config import (
 from extract_user import fetch_json_from_api, save_raw_json_to_minio
 
 # Định nghĩa các Dataset (asset) cho từng kênh theo cấu trúc mới (có partition)
-# SHOPEE_ORDER_DATASET = Dataset("s3://minio/raw/shopee/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKTOK_ORDER_DATASET = Dataset("s3://minio/raw/tiktok/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# LAZADA_ORDER_DATASET = Dataset("s3://minio/raw/lazada/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKI_ORDER_DATASET = Dataset("s3://minio/raw/tiki/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# WEBSITE_ORDER_DATASET = Dataset("s3://minio/raw/website/orders/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
+# SHOPEE_ORDER_DATASET = Dataset("s3://minio/layer=raw/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/channel=shopee/data_model=orders/{{ds}}_data.json")
+# TIKTOK_ORDER_DATASET = Dataset("s3://minio/layer=raw/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/channel=tiktok/data_model=orders/{{ds}}_data.json")
+# LAZADA_ORDER_DATASET = Dataset("s3://minio/layer=raw/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/channel=lazada/data_model=orders/{{ds}}_data.json")
+# TIKI_ORDER_DATASET = Dataset("s3://minio/layer=raw/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/channel=tiki/data_model=orders/{{ds}}_data.json")
+# WEBSITE_ORDER_DATASET = Dataset("s3://minio/layer=raw/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/channel=website/data_model=orders/{{ds}}_data.json")
 
 # Định nghĩa DAG
 default_args = {
@@ -72,7 +72,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -118,7 +118,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -164,7 +164,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -210,7 +210,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi

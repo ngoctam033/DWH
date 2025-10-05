@@ -206,7 +206,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        # #outlets=[SHOPEE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
+        # ##outlets=[SHOPEE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
     )
     
     # Task 3: Trigger DAG transform_shopee_user_to_parquet
@@ -216,7 +216,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -251,7 +251,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        # #outlets=[TIKTOK_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset TikTok
+        # ##outlets=[TIKTOK_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset TikTok
     )
     
     # Task 3: Trigger DAG transform_tiktok_user_to_parquet
@@ -261,7 +261,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -296,7 +296,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[TIKI_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
+        ##outlets=[TIKI_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
     )
 
     # Task 3: Trigger DAG transform_tiki_user_to_parquet
@@ -306,7 +306,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -341,7 +341,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[WEBSITE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
+        ##outlets=[WEBSITE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
     )
     
     # Task 3: Trigger DAG transform_website_user_to_parquet
@@ -351,7 +351,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -386,7 +386,7 @@ with DAG(
     save_to_minio_task = PythonOperator(
         task_id='save_raw_json_to_minio',
         python_callable=save_raw_json_to_minio,
-        #outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
+        ##outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
     )
 
     # Task 3: Trigger DAG transform_lazada_user_to_parquet
@@ -396,7 +396,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}'
         },
-        wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi

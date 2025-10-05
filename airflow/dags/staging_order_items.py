@@ -368,18 +368,18 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        #outlets=[LAZADA_USER_PARQUET],
+        ##outlets=[LAZADA_USER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_items_data_lazada_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_lazada',
-    #     trigger_dag_id='clean_order_items_data_lazada_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
+    trigger_clean_dag = TriggerDagRunOperator(
+        task_id='trigger_clean_order_items_data_lazada',
+        trigger_dag_id='clean_order_items_data_lazada_with_duckdb',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+    )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
@@ -423,18 +423,18 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        #outlets=[SHOPEE_USER_PARQUET],
+        ##outlets=[SHOPEE_USER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_items_data_shopee_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_shopee',
-    #     trigger_dag_id='clean_order_items_data_shopee_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
+    trigger_clean_dag = TriggerDagRunOperator(
+        task_id='trigger_clean_order_items_data_shopee',
+        trigger_dag_id='clean_order_items_data_shopee_with_duckdb',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+    )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
@@ -478,18 +478,18 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        #outlets=[TIKI_USER_PARQUET],
+        ##outlets=[TIKI_USER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_items_data_tiki_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_tiki',
-    #     trigger_dag_id='clean_order_items_data_tiki_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
+    trigger_clean_dag = TriggerDagRunOperator(
+        task_id='trigger_clean_order_items_data_tiki',
+        trigger_dag_id='clean_order_items_data_tiki_with_duckdb',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+    )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
@@ -533,18 +533,18 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        #outlets=[TIKTOK_USER_PARQUET],
+        ##outlets=[TIKTOK_USER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_items_data_tiktok_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_tiktok',
-    #     trigger_dag_id='clean_order_items_data_tiktok_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
+    trigger_clean_dag = TriggerDagRunOperator(
+        task_id='trigger_clean_order_items_data_tiktok',
+        trigger_dag_id='clean_order_items_data_tiktok_with_duckdb',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+    )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet
@@ -588,18 +588,18 @@ with DAG(
     convert_to_parquet = PythonOperator(
         task_id='convert_to_parquet',
         python_callable=convert_to_parquet_and_save,
-        #outlets=[WEBSITE_USER_PARQUET],
+        ##outlets=[WEBSITE_USER_PARQUET],
     )
 
     # Task cuối cùng: Trigger DAG clean_order_items_data_website_with_duckdb
-    # trigger_clean_dag = TriggerDagRunOperator(
-    #     task_id='trigger_clean_order_items_data_website',
-    #     trigger_dag_id='clean_order_items_data_website_with_duckdb',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #     wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
+    trigger_clean_dag = TriggerDagRunOperator(
+        task_id='trigger_clean_order_items_data_website',
+        trigger_dag_id='clean_order_items_data_website_with_duckdb',  # ID của DAG cần trigger
+        conf={
+            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+        },
+       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+    )
 
     # Định nghĩa luồng thực thi
     get_file_path >> download_file >> parse_json >> convert_to_parquet

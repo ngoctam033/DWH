@@ -230,17 +230,17 @@ with DAG(
         python_callable=get_order_items,
     )
     # Task cuối cùng: Trigger DAG transform_lazada_order_items_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_lazada_order_items_to_parquet',
-        trigger_dag_id='transform_lazada_order_items_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-        },
-        wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    )
+    # trigger_transform_dag = TriggerDagRunOperator(
+    #     task_id='trigger_transform_lazada_order_items_to_parquet',
+    #     trigger_dag_id='transform_lazada_order_items_to_parquet',  # ID của DAG cần trigger
+    #     conf={
+    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
+    #     },
+    #    wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+    # )
 
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> trigger_transform_dag
+    order_list >> order_items #>> trigger_transform_dag
 
 # DAG cho Shopee
 with DAG(
@@ -276,7 +276,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -316,7 +316,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -356,7 +356,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
@@ -396,7 +396,7 @@ with DAG(
         conf={
             'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
         },
-        wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
     )
 
     # Định nghĩa luồng thực thi
