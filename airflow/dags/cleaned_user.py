@@ -16,20 +16,6 @@ from config.minio_config import (
     get_minio_client, get_object_name
 )
 
-# # Định nghĩa asset đầu vào - với cấu trúc partition theo year/month/day
-# SHOPEE_USER_PARQUET = Dataset("s3://minio/staging/shopee/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKTOK_USER_PARQUET = Dataset("s3://minio/staging/tiktok/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKI_USER_PARQUET = Dataset("s3://minio/staging/tiki/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# LAZADA_USER_PARQUET = Dataset("s3://minio/staging/lazada/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# WEBSITE_USER_PARQUET = Dataset("s3://minio/staging/website/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-
-# # Định nghĩa asset đầu ra - chỉ thay đổi folder từ staging sang cleaned
-# SHOPEE_USER_CLEANED_PARQUET = Dataset("s3://minio/cleaned/shopee/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKTOK_USER_CLEANED_PARQUET = Dataset("s3://minio/cleaned/tiktok/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# TIKI_USER_CLEANED_PARQUET = Dataset("s3://minio/cleaned/tiki/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# LAZADA_USER_CLEANED_PARQUET = Dataset("s3://minio/cleaned/lazada/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-# WEBSITE_USER_CLEANED_PARQUET = Dataset("s3://minio/cleaned/website/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-
 default_args = {
     'owner': 'airflow',
     'retries': 1,
@@ -40,14 +26,14 @@ def clean_user_data(**context):
     """
     Đọc dữ liệu Parquet từ MinIO, làm sạch bằng DuckDB, trả về DataFrame sạch.
     """
-    conf = context['dag_run'].conf
+    # conf = context['dag_run'].conf
     params = context.get('params', {})
     channel = params.get('channel', 'shopee')
     data_model = params.get('data_model', 'users')
     bucket_name = params.get('bucket_name', 'datawarehouse')
     layer_in = params.get('layer_in', 'staging')
     # logical date lấy trong context, nếu không có thì lấy ngày hôm qua
-    logical_date = conf.get('logical_date')
+    logical_date = context['logical_date']
 
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
 
@@ -89,13 +75,12 @@ def save_cleaned_user_data(**context):
     """
     Nhận DataFrame sạch từ XCom, lưu lại file parquet vào MinIO.
     """
-    conf = context['dag_run'].conf
     params = context.get('params', {})
     channel = params.get('channel', 'shopee')
     data_model = params.get('data_model', 'users')
     bucket_name = params.get('bucket_name', 'datawarehouse')
     layer_out = params.get('layer_out', 'cleaned')
-    logical_date = conf.get('logical_date')
+    logical_date = context['logical_date']
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
 
     parquet_out = get_object_name(layer_out, channel, data_model, logical_date, file_type='parquet')
@@ -122,157 +107,157 @@ def save_cleaned_user_data(**context):
     context['ti'].xcom_push(key='cleaned_parquet_path', value=parquet_out)
     return parquet_out
 
-with DAG(
-    dag_id='clean_user_data_shopee_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'shopee'],
-    params={
-        'channel': 'shopee',
-        'data_model': 'users',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_user_data_shopee_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'shopee'],
+#     params={
+#         'channel': 'shopee',
+#         'data_model': 'users',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_user_data',
-        python_callable=clean_user_data,
-        #inlets = [SHOPEE_USER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_user_data',
+#         python_callable=clean_user_data,
+#         #inlets = [SHOPEE_USER_PARQUET]
+#     )
 
-    save_data = PythonOperator(
-        task_id='save_cleaned_user_data',
-        python_callable=save_cleaned_user_data,
-        #outlets = [SHOPEE_USER_CLEANED_PARQUET]
-    )
+#     save_data = PythonOperator(
+#         task_id='save_cleaned_user_data',
+#         python_callable=save_cleaned_user_data,
+#         #outlets = [SHOPEE_USER_CLEANED_PARQUET]
+#     )
 
-    clean_data >> save_data
+#     clean_data >> save_data
 
-with DAG(
-    dag_id='clean_user_data_lazada_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'lazada'],
-    params={
-        'channel': 'lazada',
-        'data_model': 'users',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_user_data_lazada_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'lazada'],
+#     params={
+#         'channel': 'lazada',
+#         'data_model': 'users',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_user_data',
-        python_callable=clean_user_data,
-        #inlets = [LAZADA_USER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_user_data',
+#         python_callable=clean_user_data,
+#         #inlets = [LAZADA_USER_PARQUET]
+#     )
 
-    save_data = PythonOperator(
-        task_id='save_cleaned_user_data',
-        python_callable=save_cleaned_user_data,
-        #outlets = [LAZADA_USER_CLEANED_PARQUET]
-    )
+#     save_data = PythonOperator(
+#         task_id='save_cleaned_user_data',
+#         python_callable=save_cleaned_user_data,
+#         #outlets = [LAZADA_USER_CLEANED_PARQUET]
+#     )
 
-    clean_data >> save_data
+#     clean_data >> save_data
 
-with DAG(
-    dag_id='clean_user_data_tiki_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'tiki'],
-    params={
-        'channel': 'tiki',
-        'data_model': 'users',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_user_data_tiki_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'tiki'],
+#     params={
+#         'channel': 'tiki',
+#         'data_model': 'users',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_user_data',
-        python_callable=clean_user_data,
-        #inlets = [TIKI_USER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_user_data',
+#         python_callable=clean_user_data,
+#         #inlets = [TIKI_USER_PARQUET]
+#     )
 
-    save_data = PythonOperator(
-        task_id='save_cleaned_user_data',
-        python_callable=save_cleaned_user_data,
-        #outlets = [TIKI_USER_CLEANED_PARQUET]
-    )
+#     save_data = PythonOperator(
+#         task_id='save_cleaned_user_data',
+#         python_callable=save_cleaned_user_data,
+#         #outlets = [TIKI_USER_CLEANED_PARQUET]
+#     )
 
-    clean_data >> save_data
+#     clean_data >> save_data
 
-with DAG(
-    dag_id='clean_user_data_tiktok_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'tiktok   '],
-    params={
-        'channel': 'tiktok',
-        'data_model': 'users',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_user_data_tiktok_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'tiktok   '],
+#     params={
+#         'channel': 'tiktok',
+#         'data_model': 'users',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_user_data',
-        python_callable=clean_user_data,
-        #inlets = [TIKTOK_USER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_user_data',
+#         python_callable=clean_user_data,
+#         #inlets = [TIKTOK_USER_PARQUET]
+#     )
 
-    save_data = PythonOperator(
-        task_id='save_cleaned_user_data',
-        python_callable=save_cleaned_user_data,
-        #outlets = [TIKTOK_USER_CLEANED_PARQUET]
-    )
+#     save_data = PythonOperator(
+#         task_id='save_cleaned_user_data',
+#         python_callable=save_cleaned_user_data,
+#         #outlets = [TIKTOK_USER_CLEANED_PARQUET]
+#     )
 
-    clean_data >> save_data
+#     clean_data >> save_data
 
-with DAG(
-    dag_id='clean_user_data_website_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'website'],
-    params={
-        'channel': 'website',
-        'data_model': 'users',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_user_data_website_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu người dùng trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'website'],
+#     params={
+#         'channel': 'website',
+#         'data_model': 'users',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_user_data',
-        python_callable=clean_user_data,
-        #inlets = [WEBSITE_USER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_user_data',
+#         python_callable=clean_user_data,
+#         #inlets = [WEBSITE_USER_PARQUET]
+#     )
 
-    save_data = PythonOperator(
-        task_id='save_cleaned_user_data',
-        python_callable=save_cleaned_user_data,
-        #outlets = [WEBSITE_USER_CLEANED_PARQUET]
-    )
+#     save_data = PythonOperator(
+#         task_id='save_cleaned_user_data',
+#         python_callable=save_cleaned_user_data,
+#         #outlets = [WEBSITE_USER_CLEANED_PARQUET]
+#     )
 
-    clean_data >> save_data
+#     clean_data >> save_data

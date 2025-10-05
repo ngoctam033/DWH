@@ -15,8 +15,6 @@
 #     'retries': 0,
 # }
 
-# # ORDER_CHANNEL_CLEANED_PARQUET = Dataset("s3://minio/cleaned/erp/order_channel/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.parquet")
-
 # def extract_warehouse(**context):
 #     """Extract data from warehouse table and push to XCom"""
 #     try:

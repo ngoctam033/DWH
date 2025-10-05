@@ -12,12 +12,17 @@ from config.minio_config import (
     get_object_name, upload_json_to_minio
 )
 
-# Định nghĩa các Dataset (asset) cho từng kênh theo cấu trúc mới (có partition)
-# SHOPEE_USER_DATASET = Dataset("s3://minio/raw/shopee/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKTOK_USER_DATASET = Dataset("s3://minio/raw/tiktok/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# LAZADA_USER_DATASET = Dataset("s3://minio/raw/lazada/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# TIKI_USER_DATASET = Dataset("s3://minio/raw/tiki/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
-# WEBSITE_USER_DATASET = Dataset("s3://minio/raw/website/users/year={{logical_date.year}}/month={{logical_date.strftime('%m')}}/day={{logical_date.strftime('%d')}}/{{ds}}_data.json")
+from staging_user import (
+    get_yesterday_file_paths,
+    download_all_json_files,
+    parse_json_to_table,
+    convert_to_parquet_and_save
+)
+
+from cleaned_user import (
+    clean_user_data,
+    save_cleaned_user_data
+)
 
 # Task 1: Gọi API lấy dữ liệu JSON từ nhiều nguồn khác nhau
 def fetch_json_from_api(**context):
@@ -146,186 +151,6 @@ default_args = {
 }
 
 with DAG(
-    dag_id='daily_extract_shopee_user',  # Định danh duy nhất cho DAG
-    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
-    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
-    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
-    params={
-        # Tham số mặc định có thể ghi đè khi trigger DAG
-        'api_url': 'http://data_source:8000/extract-user',
-        'order_channel': 'shopee',
-        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
-        'data_model': 'users',  # Loại dữ liệu là users
-        'extra_params': {},  # Các tham số API bổ sung
-    }
-) as dag:
-
-    # Task 1: Gọi API và lấy dữ liệu JSON
-    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
-    fetch_json_task = PythonOperator(
-        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
-        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
-    )
-    
-    # Task 2: Lưu dữ liệu JSON vào MinIO
-    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
-    save_to_minio_task = PythonOperator(
-        task_id='save_raw_json_to_minio',
-        python_callable=save_raw_json_to_minio,
-        ##outlets=[SHOPEE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Shopee
-    )
-    
-    # Task 3: Trigger DAG transform_shopee_user_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_shopee_user_to_parquet',
-        trigger_dag_id='transform_shopee_user_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}'
-        },
-       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
-    )
-
-    # Định nghĩa luồng thực thi
-    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
-
-with DAG(
-    dag_id='daily_extract_tiktok_user',  # Định danh duy nhất cho DAG
-    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
-    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
-    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
-    params={
-        # Tham số mặc định có thể ghi đè khi trigger DAG
-        'api_url': 'http://data_source:8000/extract-user',
-        'order_channel': 'tiktok',
-        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
-        'data_model': 'users',
-        'extra_params': {},  # Các tham số API bổ sung
-    }
-) as dag:
-
-    # Task 1: Gọi API và lấy dữ liệu JSON
-    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
-    fetch_json_task = PythonOperator(
-        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
-        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
-    )
-    
-    # Task 2: Lưu dữ liệu JSON vào MinIO
-    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
-    save_to_minio_task = PythonOperator(
-        task_id='save_raw_json_to_minio',
-        python_callable=save_raw_json_to_minio,
-        ##outlets=[TIKTOK_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset TikTok
-    )
-    
-    # Task 3: Trigger DAG transform_tiktok_user_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_tiktok_user_to_parquet',
-        trigger_dag_id='transform_tiktok_user_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}'
-        },
-       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
-    )
-
-    # Định nghĩa luồng thực thi
-    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
-
-with DAG(
-    dag_id='daily_extract_tiki_user',  # Định danh duy nhất cho DAG
-    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
-    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
-    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
-    params={
-        # Tham số mặc định có thể ghi đè khi trigger DAG
-        'api_url': 'http://data_source:8000/extract-user',
-        'order_channel': 'tiki',
-        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
-        'data_model': 'users',
-        'extra_params': {},  # Các tham số API bổ sung
-    }
-) as dag:
-
-    # Task 1: Gọi API và lấy dữ liệu JSON
-    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
-    fetch_json_task = PythonOperator(
-        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
-        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
-    )
-    
-    # Task 2: Lưu dữ liệu JSON vào MinIO
-    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
-    save_to_minio_task = PythonOperator(
-        task_id='save_raw_json_to_minio',
-        python_callable=save_raw_json_to_minio,
-        ##outlets=[TIKI_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Tiki
-    )
-
-    # Task 3: Trigger DAG transform_tiki_user_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_tiki_user_to_parquet',
-        trigger_dag_id='transform_tiki_user_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}'
-        },
-       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
-    )
-
-    # Định nghĩa luồng thực thi
-    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
-
-with DAG(
-    dag_id='daily_extract_website_user',  # Định danh duy nhất cho DAG
-    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
-    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
-    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
-    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
-    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
-    params={
-        # Tham số mặc định có thể ghi đè khi trigger DAG
-        'api_url': 'http://data_source:8000/extract-user',
-        'order_channel': 'website',
-        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
-        'data_model': 'users',
-        'extra_params': {},  # Các tham số API bổ sung
-    }
-) as dag:
-
-    # Task 1: Gọi API và lấy dữ liệu JSON
-    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
-    fetch_json_task = PythonOperator(
-        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
-        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
-    )
-    
-    # Task 2: Lưu dữ liệu JSON vào MinIO
-    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
-    save_to_minio_task = PythonOperator(
-        task_id='save_raw_json_to_minio',
-        python_callable=save_raw_json_to_minio,
-        ##outlets=[WEBSITE_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Website
-    )
-    
-    # Task 3: Trigger DAG transform_website_user_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_website_user_to_parquet',
-        trigger_dag_id='transform_website_user_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}'
-        },
-       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
-    )
-
-    # Định nghĩa luồng thực thi
-    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
-
-with DAG(
     dag_id='daily_extract_lazada_user',  # Định danh duy nhất cho DAG
     default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
     description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
@@ -336,6 +161,10 @@ with DAG(
         # Tham số mặc định có thể ghi đè khi trigger DAG
         'api_url': 'http://data_source:8000/extract-user',
         'order_channel': 'lazada',
+        'channel': 'lazada',
+        'layer_inlets': 'raw',
+        'layer_outlet': 'staging',
+        'bucket_name': 'datawarehouse',
         'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
         'data_model': 'users',
         'extra_params': {},  # Các tham số API bổ sung
@@ -358,14 +187,345 @@ with DAG(
     )
 
     # Task 3: Trigger DAG transform_lazada_user_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_lazada_user_to_parquet',
-        trigger_dag_id='transform_lazada_user_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}'
-        },
-       wait_for_completion=False,  # False: Không chờ DAG được trigger hoàn thành
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[SHOPEE_USER_DATASET]
     )
 
+    # Task 4: Download tất cả các file JSON từ MinIO
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    # Task 5: Parse JSON thành bảng và lưu tạm vào local
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    # Task 6: Chuyển đổi bảng thành file Parquet và lưu lên MinIO
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[SHOPEE_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_user_data',
+        python_callable=clean_user_data,
+        #inlets = [SHOPEE_USER_PARQUET]
+    )
+
+    save_data = PythonOperator(
+        task_id='save_cleaned_user_data',
+        python_callable=save_cleaned_user_data,
+        #outlets = [SHOPEE_USER_CLEANED_PARQUET]
+    )
     # Định nghĩa luồng thực thi
-    fetch_json_task >> save_to_minio_task >> trigger_transform_dag
+    fetch_json_task >> save_to_minio_task >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data >> save_data
+
+with DAG(
+    dag_id='daily_extract_shopee_user',  # Định danh duy nhất cho DAG
+    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
+    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
+    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
+    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    params={
+        # Tham số mặc định có thể ghi đè khi trigger DAG
+        'api_url': 'http://data_source:8000/extract-user',
+        'order_channel': 'shopee',
+        'channel': 'shopee',
+        'layer_inlets': 'raw',
+        'layer_outlet': 'staging',
+        'bucket_name': 'datawarehouse',
+        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
+        'data_model': 'users',
+        'extra_params': {},  # Các tham số API bổ sung
+    }
+) as dag:
+
+    # Task 1: Gọi API và lấy dữ liệu JSON
+    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
+    fetch_json_task = PythonOperator(
+        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
+        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
+    )
+    
+    # Task 2: Lưu dữ liệu JSON vào MinIO
+    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
+    save_to_minio_task = PythonOperator(
+        task_id='save_raw_json_to_minio',
+        python_callable=save_raw_json_to_minio,
+        ##outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
+    )
+
+    # Task 3: Trigger DAG transform_lazada_user_to_parquet
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[SHOPEE_USER_DATASET]
+    )
+
+    # Task 4: Download tất cả các file JSON từ MinIO
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    # Task 5: Parse JSON thành bảng và lưu tạm vào local
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    # Task 6: Chuyển đổi bảng thành file Parquet và lưu lên MinIO
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[SHOPEE_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_user_data',
+        python_callable=clean_user_data,
+        #inlets = [SHOPEE_USER_PARQUET]
+    )
+
+    save_data = PythonOperator(
+        task_id='save_cleaned_user_data',
+        python_callable=save_cleaned_user_data,
+        #outlets = [SHOPEE_USER_CLEANED_PARQUET]
+    )
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data >> save_data
+
+with DAG(
+    dag_id='daily_extract_tiki_user',  # Định danh duy nhất cho DAG
+    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
+    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
+    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
+    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    params={
+        # Tham số mặc định có thể ghi đè khi trigger DAG
+        'api_url': 'http://data_source:8000/extract-user',
+        'order_channel': 'tiki',
+        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
+        'data_model': 'users',
+        'layer_inlets': 'raw',
+        'layer_outlet': 'staging',
+        'bucket_name': 'datawarehouse',
+        'channel': 'tiki',
+        'extra_params': {},  # Các tham số API bổ sung
+    }
+) as dag:
+
+    # Task 1: Gọi API và lấy dữ liệu JSON
+    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
+    fetch_json_task = PythonOperator(
+        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
+        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
+    )
+    
+    # Task 2: Lưu dữ liệu JSON vào MinIO
+    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
+    save_to_minio_task = PythonOperator(
+        task_id='save_raw_json_to_minio',
+        python_callable=save_raw_json_to_minio,
+        ##outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
+    )
+
+    # Task 3: Trigger DAG transform_lazada_user_to_parquet
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[SHOPEE_USER_DATASET]
+    )
+
+    # Task 4: Download tất cả các file JSON từ MinIO
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    # Task 5: Parse JSON thành bảng và lưu tạm vào local
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    # Task 6: Chuyển đổi bảng thành file Parquet và lưu lên MinIO
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[SHOPEE_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_user_data',
+        python_callable=clean_user_data,
+        #inlets = [SHOPEE_USER_PARQUET]
+    )
+
+    save_data = PythonOperator(
+        task_id='save_cleaned_user_data',
+        python_callable=save_cleaned_user_data,
+        #outlets = [SHOPEE_USER_CLEANED_PARQUET]
+    )
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data >> save_data
+
+with DAG(
+    dag_id='daily_extract_tiktok_user',  # Định danh duy nhất cho DAG
+    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
+    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
+    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
+    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    params={
+        # Tham số mặc định có thể ghi đè khi trigger DAG
+        'api_url': 'http://data_source:8000/extract-user',
+        'order_channel': 'tiktok',
+        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
+        'data_model': 'users',
+        'layer_inlets': 'raw',
+        'layer_outlet': 'staging',
+        'bucket_name': 'datawarehouse',
+        'channel': 'tiktok',
+        'extra_params': {},  # Các tham số API bổ sung
+    }
+) as dag:
+
+    # Task 1: Gọi API và lấy dữ liệu JSON
+    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
+    fetch_json_task = PythonOperator(
+        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
+        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
+    )
+    
+    # Task 2: Lưu dữ liệu JSON vào MinIO
+    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
+    save_to_minio_task = PythonOperator(
+        task_id='save_raw_json_to_minio',
+        python_callable=save_raw_json_to_minio,
+        ##outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
+    )
+
+    # Task 3: Trigger DAG transform_lazada_user_to_parquet
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[SHOPEE_USER_DATASET]
+    )
+
+    # Task 4: Download tất cả các file JSON từ MinIO
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    # Task 5: Parse JSON thành bảng và lưu tạm vào local
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    # Task 6: Chuyển đổi bảng thành file Parquet và lưu lên MinIO
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[SHOPEE_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_user_data',
+        python_callable=clean_user_data,
+        #inlets = [SHOPEE_USER_PARQUET]
+    )
+
+    save_data = PythonOperator(
+        task_id='save_cleaned_user_data',
+        python_callable=save_cleaned_user_data,
+        #outlets = [SHOPEE_USER_CLEANED_PARQUET]
+    )
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data >> save_data
+
+with DAG(
+    dag_id='daily_extract_website_user',  # Định danh duy nhất cho DAG
+    default_args=default_args,    # Tham số mặc định được định nghĩa ở trên
+    description='Job hằng ngày gọi API extract-user, xử lý dữ liệu và lưu vào MinIO theo cấu trúc thư mục dữ liệu chuẩn',
+    schedule='0 0 * * *',         # Lịch chạy: 00:00 mỗi ngày (crontab expression)
+    start_date=datetime(2023, 1, 1),  # Ngày bắt đầu chạy DAG
+    catchup=False,                # False: không chạy các DAG trong quá khứ khi restart Airflow
+    params={
+        # Tham số mặc định có thể ghi đè khi trigger DAG
+        'api_url': 'http://data_source:8000/extract-user',
+        'order_channel': 'website',
+        'days_offset': 1,  # Mặc định lấy dữ liệu của ngày hôm qua
+        'data_model': 'users',
+        'layer_inlets': 'raw',
+        'layer_outlet': 'staging',
+        'bucket_name': 'datawarehouse',
+        'channel': 'website',
+        'extra_params': {},  # Các tham số API bổ sung
+    }
+) as dag:
+
+    # Task 1: Gọi API và lấy dữ liệu JSON
+    # Đây là bước extract trong quy trình ETL: trích xuất dữ liệu từ nguồn
+    fetch_json_task = PythonOperator(
+        task_id='fetch_json_from_api',  # Giữ nguyên task_id để không ảnh hưởng đến các runs trước đó
+        python_callable=fetch_json_from_api,  # Gọi hàm fetch_json_from_api đã định nghĩa ở trên
+    )
+    
+    # Task 2: Lưu dữ liệu JSON vào MinIO
+    # Đây là bước load trong quy trình ETL: lưu trữ dữ liệu đã xử lý vào data lake
+    save_to_minio_task = PythonOperator(
+        task_id='save_raw_json_to_minio',
+        python_callable=save_raw_json_to_minio,
+        ##outlets=[LAZADA_USER_DATASET]  # Đánh dấu task này sản xuất dữ liệu cho Dataset Lazada
+    )
+
+    # Task 3: Trigger DAG transform_lazada_user_to_parquet
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[SHOPEE_USER_DATASET]
+    )
+
+    # Task 4: Download tất cả các file JSON từ MinIO
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    # Task 5: Parse JSON thành bảng và lưu tạm vào local
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    # Task 6: Chuyển đổi bảng thành file Parquet và lưu lên MinIO
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[SHOPEE_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_user_data',
+        python_callable=clean_user_data,
+        #inlets = [SHOPEE_USER_PARQUET]
+    )
+
+    save_data = PythonOperator(
+        task_id='save_cleaned_user_data',
+        python_callable=save_cleaned_user_data,
+        #outlets = [SHOPEE_USER_CLEANED_PARQUET]
+    )
+    # Định nghĩa luồng thực thi
+    fetch_json_task >> save_to_minio_task >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data >> save_data

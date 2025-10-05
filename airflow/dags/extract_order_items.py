@@ -22,6 +22,14 @@ from config.minio_config import (
     get_minio_client, get_object_name, upload_json_to_minio, list_files_in_minio_dir
 )
 
+from staging_order_items import (
+    download_all_json_files,
+    parse_json_to_table,
+    convert_to_parquet_and_save
+)
+
+from cleaned_order_item import clean_order_data
+
 def get_clean_order_data(**context):
     """
     Đọc dữ liệu Parquet từ MinIO bằng DuckDB, trả về DataFrame sạch.
@@ -165,32 +173,50 @@ def get_yesterday_file_paths(**context):
     None
         Kết quả được lưu vào XCom thay vì return trực tiếp
     """
-    try:
-        folder_path = context['ti'].xcom_pull(task_ids='get_order_items',key='order_items')
-        if folder_path:
-            logging.info(f"File path: {folder_path}")
-            
-            # Lấy tham số từ context
-            params = context.get('params', {})
-            layer = params.get('layer_inlets')  # Mặc định là 'raw'
-            channel = params.get('channel')
-            data_model = params.get('data_model')
-            file_type = params.get('file_type')
+    conf = context['dag_run'].conf
+    # logical date lấy trong context, nếu không có thì lấy ngày hôm qua
+    logical_date = conf.get('logical_date', context.get('logical_date'))
+    logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
+    if not logical_date:
+        raise ValueError("logical_date không tồn tại trong context.")
+    logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")
+    
+    # Lấy tham số từ context
+    params = context.get('params', {})
+    layer = 'raw' #params.get('layer_inlets')  # Mặc định là 'raw'
+    channel = params.get('channel')
+    data_model = 'order_items'
+    file_type = params.get('file_type')
+    
+    if not channel:
+        raise ValueError("Tham số 'channel' phải được cung cấp trong params của DAG")
+    
+    # Kết quả chứa đường dẫn file
+    result = []
+    
+    # Nếu có data_model cụ thể
+    if data_model:
+        object_name = get_object_name(layer, channel, data_model, logical_date, file_type=file_type)
+        object_dir = os.path.dirname(object_name)
+        logging.info(f"Thư mục chứa file: {object_dir}")
+        # Lấy danh sách file thực tế trong thư mục object_dir
+        result = list_files_in_minio_dir(object_dir)
+        logging.info(f"Danh sách file trong thư mục: {result}")
+    else:
+        error_msg = "Tham số 'data_model' không được cung cấp trong params của DAG"
+        logging.error(error_msg)
+        raise ValueError(error_msg)
+    # Kiểm tra nếu kết quả trống
+    if not result:
+        error_msg = f"Không tìm thấy file nào cho {channel}/{data_model} ngày {logical_date.strftime('%Y-%m-%d')} trong thư mục {object_dir}"
+        logging.error(error_msg)
+        # Đánh dấu task là failed
+        raise AirflowFailException(error_msg)
+    
+    logging.info(f"Danh sách file ngày hôm qua ({logical_date}): {result}")
 
-            object_dir = os.path.dirname(folder_path) + '/'
-            logging.info(f"Thư mục chứa file: {object_dir}")
-            # Lấy danh sách file thực tế trong thư mục object_dir
-            client = get_minio_client()
-            bucket_name=DEFAULT_BUCKET
-            objects = client.list_objects(bucket_name, prefix=object_dir, recursive=True)
-            # in log ra list object
-            for obj in objects:
-                logging.info(f"Found object: {obj.object_name}")
-        else:
-            raise AirflowFailException("Không tìm thấy file nào để lấy đường dẫn")
-    except Exception as e:
-        logging.error(f"Lỗi không xác định: {str(e)}")
-        raise AirflowFailException(f"Lỗi không xác định: {str(e)}")
+    # Lưu kết quả vào XCom để các task sau có thể sử dụng
+    context['ti'].xcom_push(key='yesterday_file_paths', value=result)
 
 # Tham số chung cho DAG
 default_args = {
@@ -229,18 +255,33 @@ with DAG(
         task_id='get_order_items',
         python_callable=get_order_items,
     )
-    # Task cuối cùng: Trigger DAG transform_lazada_order_items_to_parquet
-    # trigger_transform_dag = TriggerDagRunOperator(
-    #     task_id='trigger_transform_lazada_order_items_to_parquet',
-    #     trigger_dag_id='transform_lazada_order_items_to_parquet',  # ID của DAG cần trigger
-    #     conf={
-    #         'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-    #     },
-    #    wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
-    # )
 
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+    )
+
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_order_data',
+        python_callable=clean_order_data,
+    )
     # Định nghĩa luồng thực thi
-    order_list >> order_items #>> trigger_transform_dag
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho Shopee
 with DAG(
@@ -269,18 +310,36 @@ with DAG(
         task_id='get_order_items',
         python_callable=get_order_items,
     )
-    # Task cuối cùng: Trigger DAG transform_shopee_order_items_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_shopee_order_items_to_parquet',
-        trigger_dag_id='transform_shopee_order_items_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-        },
-        wait_for_completion=False,  # Chờ DAG được trigger hoàn thành
+
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[LAZADA_USER_DATASET]
     )
 
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[LAZADA_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_order_data',
+        python_callable=clean_order_data,
+        #inlets = [LAZADA_ORDER_PARQUET]
+    )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> trigger_transform_dag
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho Tiki
 with DAG(
@@ -309,18 +368,36 @@ with DAG(
         task_id='get_order_items',
         python_callable=get_order_items,
     )
-    # Task cuối cùng: Trigger DAG transform_tiki_order_items_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_tiki_order_items_to_parquet',
-        trigger_dag_id='transform_tiki_order_items_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-        },
-       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[LAZADA_USER_DATASET]
     )
 
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[LAZADA_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_order_data',
+        python_callable=clean_order_data,
+        #inlets = [LAZADA_ORDER_PARQUET]
+    )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> trigger_transform_dag
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho Tiktok
 with DAG(
@@ -349,18 +426,36 @@ with DAG(
         task_id='get_order_items',
         python_callable=get_order_items,
     )
-    # Task cuối cùng: Trigger DAG transform_tiktok_order_items_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_tiktok_order_items_to_parquet',
-        trigger_dag_id='transform_tiktok_order_items_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-        },
-       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[LAZADA_USER_DATASET]
     )
 
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[LAZADA_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_order_data',
+        python_callable=clean_order_data,
+        #inlets = [LAZADA_ORDER_PARQUET]
+    )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> trigger_transform_dag
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
 
 # DAG cho Website
 with DAG(
@@ -389,15 +484,33 @@ with DAG(
         task_id='get_order_items',
         python_callable=get_order_items,
     )
-    # Task cuối cùng: Trigger DAG transform_website_order_items_to_parquet
-    trigger_transform_dag = TriggerDagRunOperator(
-        task_id='trigger_transform_website_order_items_to_parquet',
-        trigger_dag_id='transform_website_order_items_to_parquet',  # ID của DAG cần trigger
-        conf={
-            'logical_date': '{{ ds }}',  # Truyền logical_date (ngày chạy của DAG)
-        },
-       wait_for_completion=False,  # Không chờ DAG được trigger hoàn thành
+
+    get_file_path = PythonOperator(
+        task_id='get_yesterday_file_paths',
+        python_callable=get_yesterday_file_paths,
+        ##inlets=[LAZADA_USER_DATASET]
     )
 
+    download_file = PythonOperator(
+        task_id='download_all_json_files',
+        python_callable=download_all_json_files,
+    )
+
+    parse_json = PythonOperator(
+        task_id='parse_json_to_table',
+        python_callable=parse_json_to_table,
+    )
+
+    convert_to_parquet = PythonOperator(
+        task_id='convert_to_parquet',
+        python_callable=convert_to_parquet_and_save,
+        ##outlets=[LAZADA_USER_PARQUET],
+    )
+
+    clean_data = PythonOperator(
+        task_id='clean_order_data',
+        python_callable=clean_order_data,
+        #inlets = [LAZADA_ORDER_PARQUET]
+    )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> trigger_transform_dag
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet

@@ -29,7 +29,7 @@ def clean_order_data(**context):
     conf = context['dag_run'].conf
     params = context.get('params', {})
     channel = params.get('channel')
-    data_model = params.get('data_model')
+    data_model = 'order_items'
     bucket_name = params.get('bucket_name', 'datawarehouse')
     layer_in = params.get('layer_in')
     layer_out = params.get('layer_out')
@@ -137,158 +137,158 @@ def clean_order_data(**context):
 #     context['ti'].xcom_push(key='cleaned_parquet_path', value=parquet_out)
 #     return parquet_out
 
-with DAG(
-    dag_id='clean_order_items_data_lazada_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'lazada'],
-    params={
-        'channel': 'lazada',
-        'data_model': 'order_items',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_order_items_data_lazada_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'lazada'],
+#     params={
+#         'channel': 'lazada',
+#         'data_model': 'order_items',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_order_data',
-        python_callable=clean_order_data,
-        #inlets = [LAZADA_ORDER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_order_data',
+#         python_callable=clean_order_data,
+#         #inlets = [LAZADA_ORDER_PARQUET]
+#     )
 
-    # save_data = PythonOperator(
-    #     task_id='save_cleaned_order_data',
-    #     python_callable=save_cleaned_order_data,
-    #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
-    # )
+#     # save_data = PythonOperator(
+#     #     task_id='save_cleaned_order_data',
+#     #     python_callable=save_cleaned_order_data,
+#     #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
+#     # )
 
-    clean_data #>> save_data
+#     clean_data #>> save_data
 
-with DAG(
-    dag_id='clean_order_items_data_shopee_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'shopee'],
-    params={
-        'channel': 'shopee',
-        'data_model': 'order_items',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_order_items_data_shopee_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'shopee'],
+#     params={
+#         'channel': 'shopee',
+#         'data_model': 'order_items',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_order_data',
-        python_callable=clean_order_data,
-        #inlets = [LAZADA_ORDER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_order_data',
+#         python_callable=clean_order_data,
+#         #inlets = [LAZADA_ORDER_PARQUET]
+#     )
 
-    # save_data = PythonOperator(
-    #     task_id='save_cleaned_order_data',
-    #     python_callable=save_cleaned_order_data,
-    #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
-    # )
+#     # save_data = PythonOperator(
+#     #     task_id='save_cleaned_order_data',
+#     #     python_callable=save_cleaned_order_data,
+#     #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
+#     # )
 
-    clean_data #>> save_data
+#     clean_data #>> save_data
 
-with DAG(
-    dag_id='clean_order_items_data_tiki_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'tiki'],
-    params={
-        'channel': 'tiki',
-        'data_model': 'order_items',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_order_items_data_tiki_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'tiki'],
+#     params={
+#         'channel': 'tiki',
+#         'data_model': 'order_items',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_order_data',
-        python_callable=clean_order_data,
-        #inlets = [LAZADA_ORDER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_order_data',
+#         python_callable=clean_order_data,
+#         #inlets = [LAZADA_ORDER_PARQUET]
+#     )
 
-    # save_data = PythonOperator(
-    #     task_id='save_cleaned_order_data',
-    #     python_callable=save_cleaned_order_data,
-    #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
-    # )
+#     # save_data = PythonOperator(
+#     #     task_id='save_cleaned_order_data',
+#     #     python_callable=save_cleaned_order_data,
+#     #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
+#     # )
 
-    clean_data #>> save_data
+#     clean_data #>> save_data
 
-with DAG(
-    dag_id='clean_order_items_data_tiktok_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'tiktok'],
-    params={
-        'channel': 'tiktok',
-        'data_model': 'order_items',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_order_items_data_tiktok_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'tiktok'],
+#     params={
+#         'channel': 'tiktok',
+#         'data_model': 'order_items',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_order_data',
-        python_callable=clean_order_data,
-        #inlets = [LAZADA_ORDER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_order_data',
+#         python_callable=clean_order_data,
+#         #inlets = [LAZADA_ORDER_PARQUET]
+#     )
 
-    # save_data = PythonOperator(
-    #     task_id='save_cleaned_order_data',
-    #     python_callable=save_cleaned_order_data,
-    #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
-    # )
+#     # save_data = PythonOperator(
+#     #     task_id='save_cleaned_order_data',
+#     #     python_callable=save_cleaned_order_data,
+#     #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
+#     # )
 
-    clean_data #>> save_data
+#     clean_data #>> save_data
 
 
-with DAG(
-    dag_id='clean_order_items_data_website_with_duckdb',
-    default_args=default_args,
-    description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
-    #schedule='0 4 * * *',
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-    tags=['clean', 'duckdb', 'minio', 'website'],
-    params={
-        'channel': 'website',
-        'data_model': 'order_items',
-        'bucket_name': DEFAULT_BUCKET,
-        'layer_in': 'staging',
-        'layer_out': 'cleaned'
-    }
-) as dag:
+# with DAG(
+#     dag_id='clean_order_items_data_website_with_duckdb',
+#     default_args=default_args,
+#     description='Làm sạch dữ liệu order_items trên MinIO bằng DuckDB và lưu lại vào MinIO',
+#     #schedule='0 4 * * *',
+#     start_date=datetime(2023, 1, 1),
+#     catchup=False,
+#     tags=['clean', 'duckdb', 'minio', 'website'],
+#     params={
+#         'channel': 'website',
+#         'data_model': 'order_items',
+#         'bucket_name': DEFAULT_BUCKET,
+#         'layer_in': 'staging',
+#         'layer_out': 'cleaned'
+#     }
+# ) as dag:
 
-    clean_data = PythonOperator(
-        task_id='clean_order_data',
-        python_callable=clean_order_data,
-        #inlets = [LAZADA_ORDER_PARQUET]
-    )
+#     clean_data = PythonOperator(
+#         task_id='clean_order_data',
+#         python_callable=clean_order_data,
+#         #inlets = [LAZADA_ORDER_PARQUET]
+#     )
 
-    # save_data = PythonOperator(
-    #     task_id='save_cleaned_order_data',
-    #     python_callable=save_cleaned_order_data,
-    #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
-    # )
+#     # save_data = PythonOperator(
+#     #     task_id='save_cleaned_order_data',
+#     #     python_callable=save_cleaned_order_data,
+#     #     # #outlets = [LAZADA_ORDER_CLEANED_PARQUET]
+#     # )
 
-    clean_data #>> save_data
+#     clean_data #>> save_data
