@@ -32,7 +32,7 @@ def clean_order_data(**context):
     data_model = 'order_items'
     bucket_name = params.get('bucket_name', 'datawarehouse')
     layer_in = params.get('layer_in')
-    layer_out = params.get('layer_out')
+    layer_out = 'cleaned'
     logical_date = conf.get('logical_date', context.get('logical_date'))
     
     logging.info(f"Ngày logical date của DAG run này: {logical_date} (type: {type(logical_date)})")

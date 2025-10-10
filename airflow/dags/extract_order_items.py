@@ -281,7 +281,7 @@ with DAG(
         python_callable=clean_order_data,
     )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data
 
 # DAG cho Shopee
 with DAG(
@@ -339,7 +339,7 @@ with DAG(
         #inlets = [LAZADA_ORDER_PARQUET]
     )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data
 
 # DAG cho Tiki
 with DAG(
@@ -397,7 +397,7 @@ with DAG(
         #inlets = [LAZADA_ORDER_PARQUET]
     )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data
 
 # DAG cho Tiktok
 with DAG(
@@ -455,7 +455,7 @@ with DAG(
         #inlets = [LAZADA_ORDER_PARQUET]
     )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data
 
 # DAG cho Website
 with DAG(
@@ -513,4 +513,4 @@ with DAG(
         #inlets = [LAZADA_ORDER_PARQUET]
     )
     # Định nghĩa luồng thực thi
-    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet
+    order_list >> order_items >> get_file_path >> download_file >> parse_json >> convert_to_parquet >> clean_data
